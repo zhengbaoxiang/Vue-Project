@@ -1,0 +1,110 @@
+.main {
+    // 主要用于页面布局样式
+
+    .sider-menu {
+        overflow: hidden;
+
+        .logoCon {
+            padding: 20px 10px;
+            box-sizing: content-box;
+            height: 50px;
+
+            .logoImg {
+                width: 50px;
+                vertical-align: middle;
+                float: left;
+            }
+
+            .loginTitle {
+                display: inline-block;
+                margin: 10px;
+                color: #ea5404;
+                font-size: 18px;
+                font-weight: 700;
+                font-style: normal;
+                word-wrap: break-word;
+                text-rendering: optimizeLegibility;
+            }
+        }
+
+        .ivu-menu-vertical {
+            margin: 0;
+        }
+    }
+
+    .header-menu {
+        padding: 0 0px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 1);
+        // border-bottom: 0.5px solid black;
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+        height: 48px;
+        line-height: 48px;
+
+        .logoCon {
+            height: 100%;
+            vertical-align: middle;
+            margin: 0 20px;
+
+            .logoImg {
+                display: inline-block;
+                width: 30px;
+                vertical-align: middle;
+            }
+
+            .loginTitle {
+                display: inline-block;
+                color: #ea5404;
+                font-size: 18px;
+                font-weight: 700;
+                font-style: normal;
+                word-wrap: break-word;
+                text-rendering: optimizeLegibility;
+                margin-left: 10px;
+            }
+        }
+
+        .ivu-menu-horizontal {
+            height: 48px;
+            line-height: 48px;
+
+            &::after {
+                display: none;
+            }
+        }
+
+        .userCon {
+            margin-right: 40px
+        }
+    }
+
+    .main-layout-con {
+        height: 100%;
+        overflow: auto;
+
+        .header-con {
+            padding: 0 0px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            background: #fff;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-wrapper {
+            // height: ~"calc(100vh - 190px)";
+            padding: 0 20px;
+            overflow: auto;
+        }
+
+        .thinWrapper.content-wrapper {
+            padding: 0 80px;
+        }
+    }
+
+
+
+
+}

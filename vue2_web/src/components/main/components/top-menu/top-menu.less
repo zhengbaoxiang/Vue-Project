@@ -1,0 +1,66 @@
+@import '../../../../index.less';
+.em-menu {
+    background-color: #fff;
+    border-top: 1px solid #eee;
+}
+.em-menu-item {
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+}
+.em-menu-item:hover {
+    background-color: #ddd;
+}
+.em-menu-item .em-menu-icon-con {
+    color: @primary-color;
+}
+.em-menu-item .em-menu-item-main {
+    padding: 20px 0;
+}
+.em-menu-item .em-menu-name {
+    color: #333;
+    font-weight: bold;
+}
+.em-submenu-wrap {
+    position: absolute;
+    top: 106px;
+    background-color: #fff;
+    width: 100%;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    z-index: 999;
+    font-size: 0;
+    box-sizing: content-box;
+    box-shadow: 0 0 30px #999;
+    height: 0;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+.em-submenu {
+    width: 150px;
+    display: inline-block;
+    vertical-align: top;
+}
+.em-submenu .em-submenu-title {
+    font-size: 12px;
+    color: #000;
+    font-weight: bold;
+    padding: 14px 15px;
+    height: 48px;
+    text-align: left;
+}
+.em-submenu .em-submenu-item {
+    border-bottom: 1px solid #eee;
+    align-items: center;
+    height: 48px;
+    padding: 0 15px;
+}
+.em-submenu .em-submenu-item:hover {
+    background-color: #ddd;
+}
+.em-submenu .em-submenu-item .em-submenu-icon {
+    color: @primary-color;
+}
+.em-submenu .em-submenu-item .em-submenu-name {
+    font-size: 13px;
+}
