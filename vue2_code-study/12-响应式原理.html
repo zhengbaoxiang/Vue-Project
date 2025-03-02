@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script>
+    // 1 响应式 简介
+    let o = {}
+    o.name = 'zhangdan' // 等价于
+    Object.defineProperty(o,'age',{
+        configurable:true,
+        writable:true,
+        enumerable:true,
+        value:19
+    })
+    // 响应式就是，赋值和读取是，触发事件，做额外的事
+    let _gender = 'boy'
+    Object.defineProperty(o,'gender',{
+        configurable:true,
+        enumerable:true,
+        get(){ // 当使用obj.gender时触发
+            console.log('->触发get');
+            return _gender
+        },
+        set(newVal){
+            console.log('->触发set',newVal ,'<');
+            _gender = newVal
+        }
+    })
+
+    // 2 如何不使用中间变量，而且将所有属性都设置为响应式？
+    // VUE 使用 defineReactive(target,key,value,enumerable)
+
+    const ob = {
+        name:'张三',
+        age:19,
+        gender:true
+    }
+
+    // 简化版本
+    function defineReactive(target,key,value,enumerable){
+        Object.defineProperty(target,key,{
+            enumerable,
+            get(){
+                console.log('->触发get');
+                return value
+            },
+            set(newVal){
+                console.log('->触发set',newVal ,'<');
+                value = newVal
+            }
+        })
+    };
+    Object.keys(ob).forEach(key=>{
+        defineReactive(ob,key,ob[key],true)
+    })
+
+
+    // 3 针对多层嵌套对象数据，递归优化方案
+    let data = {
+        name:'11',
+        age:11,
+        info:{
+            url:'www.baidu.com',
+            img:'12312312.jpg'
+        },
+        list:[
+            {name:'语文'}
+        ]
+    }
+    // 将对象变成响应式
+    function reactfity(o){
+        let keys = Object.keys(o)
+        for(let i=0;i<keys.length;i++){
+            let key = keys[i]
+            let value = o[key] 
+
+            // 判断value 是不是引用类型，是否递归对象，或者循环数组
+            if(Array.isArray(value)){
+                
+                for(let j=0;j<value.length;j++){
+                    console.log('->', value[j],'<');
+                    reactfity(value[j])
+                }
+            }else{ // 对象或者值类型
+                defineReactive(o,key,value,true)
+            }
+        }
+    };
+
+    function defineReactive(target,key,value,enumerable){
+        // 3新增
+        if(typeof value === 'object'&& value!=null&&!Array.isArray(value)){
+            reactfity(value)
+        }
+
+        Object.defineProperty(target,key,{
+            configurable:true,
+            enumerable,
+            get(){
+                console.log('->触发get',value);
+                return value
+            },
+            set(newVal){
+                console.log('->触发set',newVal ,'<');
+                value = newVal
+            }
+        })
+    };
+
+    // // 优化4  vue2 针对数组的几种方法，也变成响应式，需要扩展函数功能
+    // push pop shift unshift reverse splice  sort
+
+    let Array_Method = ['push','pop','shift','unshift']
+    // 修改继承的原型链结构，不改变Array原型的方法
+    let tempPrototype = Object.create(Array.prototype)
+    Array_Method.forEach(method=>{
+        tempPrototype[method] = function(){
+            console.log('->', '数组拦截了','<');
+            // 调用原来的方法
+           let res =  Array.prototype[method].apply(this,arguments)
+            
+            // 新功能,可以监听到数组改变了，将改变的参数，也进行响应话处理
+            for(let i=0;i<arguments.length;i++){
+                reactfity(arguments[i])
+            }
+
+            return res
+        }
+    })
+    function reactfity(o){
+        let keys = Object.keys(o)
+        for(let i=0;i<keys.length;i++){
+            let key = keys[i]
+            let value = o[key] 
+
+            // 判断value 是不是引用类型，是否递归对象，或者循环数组
+            if(Array.isArray(value)){
+                // 优化4 新增
+                value.__proto__ = tempPrototype
+
+                for(let j=0;j<value.length;j++){
+                    console.log('->', value[j],'<');
+                    reactfity(value[j])
+                }
+                defineReactive(o,key,value,true)
+            }else{ // 对象或者值类型
+                defineReactive(o,key,value,true)
+            }
+        }
+    };
+
+
+
+    reactfity(data)
+    console.log('->', data,'<');
+    
+
+
+</script>
+</html>
