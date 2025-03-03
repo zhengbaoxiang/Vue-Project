@@ -17,7 +17,4 @@ if errorlevel 1 (
     echo error,Node.js server Failed
     pause
     exit /b %errorlevel%
-)else(
-    echo Node.js server start success
-    pause
 )
