@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-06 10:08:02
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-03 16:37:29
+ * @LastEditTime: 2025-03-03 16:51:38
  * @FilePath: \management\src\main.js
  */
 
@@ -22,7 +22,7 @@ Vue.use(iView, { i18n: (key, value) => i18n.t(key, value) })
 
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-Vue.use(ElementUi) // 引入ui框架
+Vue.use(ElementUI) // 引入ui框架
 
 import './assets/globalcss.css'
 import './assets/globalless.less'

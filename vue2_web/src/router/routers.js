@@ -208,7 +208,8 @@ export default [
         path: '/myIndex',
         name: 'myIndex',
         meta: {
-            hideInMenu: true
+            title: '我的主页',
+            hideInMenu: false
         },
         component: () => import('@/view/myIndex/myIndex.vue')
     },

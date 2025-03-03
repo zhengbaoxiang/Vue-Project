@@ -18,7 +18,7 @@ const isTest = process.env.VUE_APP_ENV === "testing"
 const isProduction = process.env.NODE_ENV === 'production' // 判断是否是生产环境
 const publicPath = process.env.VUE_APP_PUBLIC_PATH
 
-const DateString = (new Date().getMonth() + 1) + '-' + new Date().getDate() + '_' + new Date().getHours() + new Date().getMinutes()
+const DateString = (new Date().getMonth() + 1) + '-' + new Date().getDate() + '_' + new Date().getHours()+ '_' + new Date().getMinutes()
 
 // 分析打包大小使用默认配置  
 let plugins = isTest ? [
@@ -179,33 +179,34 @@ module.exports = defineConfig({
                 enforceSizeThreshold: 50000,
                 cacheGroups: {
                     // 默认配置之后，自定义
-
                     element: {
                         name: "element-ui",
                         test: /[\\/]element-ui[\\/]/,
+                        chunks: "all",
                         priority: 20,
                         reuseExistingChunk: true,
                     },
                     iView: {
                         name: "iView",
                         test: /[\\/]view-design[\\/]/,
+                        chunks: "all",
                         priority: 20,
                         reuseExistingChunk: true,
+                        enforce: true
                     },
                     mockjs: {
                         name: "chunk-mockjs",
                         test: /[\\/]node_modules[\\/]mockjs[\\/]/,
-                        priority: 4,
                         chunks: "all",
-                        priority: 3,
+                        priority: 4,
                         reuseExistingChunk: true,
                         enforce: true
                     },
                     echarts: {
                         name: "chunk-echarts",
                         test: /[\\/]node_modules[\\/]echarts[\\/]/,
-                        priority: 4,
                         chunks: "all",
+                        priority: 4,
                         reuseExistingChunk: true,
                         enforce: true
                     },

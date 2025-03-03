@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    // 比如要判断一个标签是不是html原生标签
+    let htmlTags = 'html,body,div,p,a,img,ul,li,span,h1,h2,h3'.split(',')
+
+    // 1常规遍历法，10个标签就是十次循环，如果项目里几千个标签，每个标签验证一遍就要重复循环几万次
+    let hasTag = htmlTags.includes('div')
+
+    //2 柯里化方法:一个函数本来有多个参数，只传入一个参数，生成一个新函数返回，由新函数接收剩余参数的结构
+    function makeMap(keys){
+        let set = {}
+        keys.forEach(element => {
+            set[key] = true
+        });
+        return function (tagName){
+            return !!set[tagName.toLowerCase()]
+        };
+    };
+
+    let isHtmlTag = makeMap(htmlTags)
+
+    console.log('->', isHtmlTag('p'),'<');
+    
+
+
+
+</script>
+
+</html>
