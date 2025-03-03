@@ -1,53 +1,55 @@
 /*
  * @Date: 2022-04-07 11:16:03
  * @LastEditors: zbx
- * @LastEditTime: 2022-04-27 13:08:45
+ * @LastEditTime: 2025-03-03 15:49:23
  * @FilePath: \management\src\router\index.js
  */
 import Vue from 'vue'
 import Router from 'vue-router'
 import routes from './routers'
 
+import { getToken, setToken, setSession, hasPermission, canTurnTo, setTitle } from '@/libs/util'
+import config from '@/config'
 import store from '@/store'
 import iView from 'view-design'
-import config from '@/config'
 
-import { getToken, canTurnTo, setTitle } from '@/libs/util'
-
-Vue.use(Router)
-const router = new Router({
-    routes,
-    mode: 'history',
-    base: config.publicPath
-})
 const LOGIN_PAGE_NAME = 'login'
 const HOME_NAME = 'home'
 
-const turnTo = (to, access, next) => {
-    if (canTurnTo(to.name, access, routes)) {
-        next()
-    } else next({ replace: true, name: 'error_401' }) // 无权限，重定向到401页面
-}
+Vue.use(Router)
+
+const router = new Router({
+    mode: 'history',
+    base: config.publicPath,
+    routes,
+})
+
+
+
 
 router.beforeEach((to, from, next) => {
     iView.LoadingBar.start()
     const token = from.query.token || to.query.token || getToken();
 
     console.log('--beforeEach->', token, to.name, '<---');
+
     let debug = false
-    if(debug) {
+    if (debug) {
         next() // 跳转
         return
     }
 
-    if (!token && to.name !== LOGIN_PAGE_NAME) {
+    if (!token && to.name == LOGIN_PAGE_NAME) {
+        // 未登陆且要跳转的页面是登录页
+        next() // 跳转
+
+    } else if (!token && to.name !== LOGIN_PAGE_NAME) {
         // 未登录且要跳转的页面不是登录页
+        // 可以在此缓存初始链接，登陆后，回调这个页面,todo
+        setSession('lastUrl', location.href)
         next({
             name: LOGIN_PAGE_NAME // 跳转到登录页
         })
-    } else if (!token && to.name === LOGIN_PAGE_NAME) {
-        // 未登陆且要跳转的页面是登录页
-        next() // 跳转
     } else if (token && to.name === LOGIN_PAGE_NAME) {
         // 已登录且要跳转的页面是登录页
         next({
@@ -56,16 +58,16 @@ router.beforeEach((to, from, next) => {
     } else {
         store.commit('setToken', token);
         if (store.state.user.hasGetInfo) {
-            turnTo(to, store.state.user.access, next);
+            permissionHook(to, store.state.user.access, next);
         } else {
             store.dispatch('getUserInfo', token).then(access => {
                 // 拉取用户信息，通过用户权限和跳转的页面的name来判断是否有权限访问;access必须是一个数组，
                 // 如：['super_admin'] ['super_admin', 'admin']
-                turnTo(to, access, next);
+                permissionHook(to, access, next);
                 // next()
             }).catch(err => {
-                // turnTo(to, access, next);
                 console.log(err)
+                // 报错回到登录页？还是404，还是不处理,token需要清空
                 store.commit('setToken', '');
                 next({
                     name: LOGIN_PAGE_NAME // 鉴权接口如果报错，跳转到登录页
@@ -75,10 +77,16 @@ router.beforeEach((to, from, next) => {
     }
 })
 
+const permissionHook = (to, access, next) => {
+    if (canTurnTo(to.name, access, routes)) {
+        next()
+    } else next({ replace: true, name: 'error_401' }) // 无权限，重定向到401页面
+}
+
 router.afterEach(to => {
-    setTitle(to, router.app)
-    iView.LoadingBar.finish()
+    // iView.LoadingBar.finish()
     window.scrollTo(0, 0)
+    setTitle(to, router.app)
 })
 
 export default router

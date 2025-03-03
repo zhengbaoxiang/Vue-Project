@@ -1,3 +1,6 @@
+
+import router from '@/router'
+import routers from '@/router/routers'
 import {
     getBreadCrumbList,
     setTagNavListInLocalstorage,
@@ -9,10 +12,9 @@ import {
     routeEqual,
     getRouteTitleHandled,
     setLocal,
-    getLocal
+    getLocal,
+    getMenuByRoutes
 } from '@/libs/util'
-import router from '@/router'
-import routers from '@/router/routers'
 import config from '@/config'
 const { homeName } = config
 
@@ -133,5 +135,10 @@ export default {
         //     commit('updateDoneCount', res.data || 0);
         //   });
         // }
+        generateMenuList({ commit, rootState }) {
+            let menuList = getMenuByRoutes(routers, rootState.user.access);
+            console.log('-menuList>', menuList)
+            commit('setMenuList', menuList);
+        },
     }
 }

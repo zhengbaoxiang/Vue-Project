@@ -1,111 +1,64 @@
 /*
- * @Date: 2021-10-09 09:35:16
+ * @Date: 2023-12-13 16:48:52
  * @LastEditors: zbx
- * @LastEditTime: 2022-04-27 11:19:10
- * @FilePath: \frontCode\src\libs\axios.js
+ * @LastEditTime: 2023-12-13 16:56:28
+ * @descript: 文件描述
  */
-import axios from 'axios'
-import store from '@/store'
+import axios from 'axios';
+import config from '@/config';
 import { getToken } from '@/libs/util'
-import config from '@/config'
-const baseURL = config.baseUrl
-
-const addErrorLog = errorInfo => {
-    const {
-        statusText,
-        status,
-        request: {
-            responseURL
-        }
-    } = errorInfo
-    let info = {
-        type: 'ajax',
-        code: status,
-        mes: statusText,
-        url: responseURL
-    }
-    if (!responseURL.includes('save_error_logger')) store.dispatch('addErrorLog', info)
-}
 
 class HttpRequest {
-    constructor (baseUrl = baseURL) {
-        this.baseUrl = baseUrl
-        this.queue = {}
-    }
-    getInsideConfig () {
-        const config = {
-            baseURL: this.baseUrl,
-            headers: {
-                'token': getToken(),
-            },
-            withCredentials: true
-        }
-        return config
-    }
-    destroy (url) {
-        delete this.queue[url]
-        if (!Object.keys(this.queue).length) {
-            // Spin.hide()
-        }
-    }
-    interceptors (instance, url) {
-        // 请求拦截
-        instance.interceptors.request.use(config => {
-            // 添加全局的loading...
-            if (!Object.keys(this.queue).length) {
-                // Spin.show() // 不建议开启，因为界面不友好
-            }
-            this.queue[url] = true
-            return config
-        }, error => {
-            return Promise.reject(error)
-        })
-        // 响应拦截
-        instance.interceptors.response.use(res => {
-            this.destroy(url)
-            const {
-                data,
-                status,
-                headers
-            } = res
-            return {
-                data,
-                status,
-                headers
-            }
-        }, error => {
-            this.destroy(url)
-            let errorInfo = error.response
-            if (!errorInfo) {
-                const {
-                    request: {
-                        statusText,
-                        status
-                    },
-                    config
-                } = JSON.parse(JSON.stringify(error))
-                errorInfo = {
-                    statusText,
-                    status,
-                    request: {
-                        responseURL: config.url
-                    }
-                }
-            }
-            addErrorLog(errorInfo)
-            return Promise.reject(error)
-        })
-    }
-    request (options) {
-        const instance = axios.create()
-        options = Object.assign(this.getInsideConfig(), options)
-        this.interceptors(instance, options.url)
-        return instance(options)
-    }
+  constructor(baseUrl) {
+    this.baseURL = baseUrl;
+  }
+  getInsideConfig() {
+    // 自定义的配置
+    const config = {
+      baseURL: this.baseUrl,
+      headers: {
+        token: getToken(),
+      },
+      withCredentials: true,
+    };
+    return config;
+  }
+  // 自定义拦截器
+  interceptors(instance, url) {
+    instance.interceptors.request.use(
+      (config) => {
+        // 此处可以对配置动态修改，但是我们挪到一个getInsideConfig方法了，
+        // 在创建实例时就混入配置，避免接口的单独配置被此处拦截器覆盖
+        return config;
+      },
+      (err) => {
+        return Promise.reject(err);
+      }
+    );
+
+    instance.interceptors.response.use(
+      (response) => {
+        // status 200的
+        // 此处可以对接口成功的响应拦截，根据 response.data中的返回，做不同的处理 如code200表示正常,或status 1 表示正常
+        // 由于业务逻辑不同，为降低代码耦合性，将此处的逻辑抽离出去，在request.js中单独处理
+        return response;
+      },
+      (err) => {
+        // status 非200,接口不通的
+        return Promise.reject(err);
+      }
+    );
+  }
+  request(options) {
+    const instance = axios.create();
+    options = Object.assign(this.getInsideConfig(), options); // 将自定义配置与传入的配置整合
+    this.interceptors(instance, options.url); // 给axios 实例单独增加拦截器，非全局
+    return instance(options); // 返回实例调用的结果，是一个promise对象。约等于 axios(options)
+  }
 }
 
-// export default HttpRequest
+const myAxios = new HttpRequest(config.baseUrl);
+export default myAxios;
 
-// 简化代码，合并api.request.js 到此处
-const MyAxios = new HttpRequest(config.baseUrl)
-export default MyAxios
+// 封装另一个业务线接口对应的调用函数
+export const mAxios2 = new HttpRequest(config.IMApiUrl)

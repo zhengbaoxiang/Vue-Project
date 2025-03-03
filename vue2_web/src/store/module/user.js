@@ -1,9 +1,4 @@
-import {
-    login,
-    logout,
-    getUserAuth,
-    ticketLogin
-} from '@/api/user'
+import { login, logout, getUserAuth, ticketLogin } from '@/api/user'
 import { setToken, getToken, getLocal, setLocal } from '@/libs/util'
 export default {
     state: {
@@ -15,6 +10,7 @@ export default {
         userName: getLocal('userInfo').username || '',
         roleCode: null,
         roleName: '',
+        roleList: [],
         // 是否存下了用户信息
         hasGetInfo: false,
 
@@ -27,8 +23,9 @@ export default {
     getters: {
         // Getter 也可以接受其他 getter 作为第二个参数：
         //组件使用： this.$store.getters.userName 或 mapGetters(['userName])
-        userName: (state, getters) => state.userInfo.username,
+        userName: (state, getters,rootState) => state.userInfo.username,
         userCode: state => state.userInfo.userCode,
+        access: state => state.access,
         auth: state => state.auth,
 
         // 也可以通过让 getter 返回一个函数，来实现给 getter 传参。
@@ -92,7 +89,7 @@ export default {
                     // key: userInfo.key,
                     // code: userInfo.code
                 }).then(res => {
-                    console.log('->',res,'<');
+                    console.log('->', res, '<');
                     commit('setToken', res.data.token);
                     const userInfo = res.data.userInfo
                     commit('setUserInfo', userInfo);
@@ -108,7 +105,7 @@ export default {
         // 获取用户相关信息
         getUserInfo({ state, commit, rootState }, token) {
             return new Promise((resolve, reject) => {
-                getUserAuth({token}).then(res => {
+                getUserAuth({ token }).then(res => {
                     // // 整合权限列表
                     let auth = {}, access = []
                     //----------------------------------------
@@ -130,7 +127,7 @@ export default {
                     //----------------------------------------
                     // 2 利用角色权限控制
                     let userInfo = res.data
-                    
+
                     // access = ['admin', 'reviewer', 'staff']
                     let roleCode = userInfo.roleCode
 

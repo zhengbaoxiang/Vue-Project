@@ -1,7 +1,6 @@
 import Main from '@/components/main'
 // import parentView from '@/components/parent-view'
 
-
 /**
  * iview-admin中meta除了原生参数外可配置的参数:
  * meta: {
@@ -179,6 +178,39 @@ export default [
 
             }
         ]
+    },
+    {
+        path: '/three',
+        name: 'three',
+        component: Main,
+        redirect: '/three3D',
+        meta: {
+            title: '模板管理',
+            notCache: true,
+            icon: 'logo-buffer',
+            // hideInMenu: true,
+        },
+        children: [
+            {
+                path: '/three3D',
+                name: 'three3D',
+                meta: {
+                    title: 'three3D',
+                    notCache: true,
+                    access: ['admin']
+                },
+                component: () => import('@/view/three3d/example.vue')
+
+            }
+        ]
+    },
+    {
+        path: '/myIndex',
+        name: 'myIndex',
+        meta: {
+            hideInMenu: true
+        },
+        component: () => import('@/view/myIndex/myIndex.vue')
     },
     {
         path: '/401',

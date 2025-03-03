@@ -1,8 +1,8 @@
 /*
  * @Date: 2023-12-08 11:19:29
  * @LastEditors: zbx
- * @LastEditTime: 2023-12-14 16:47:42
- * @descript: 文件描述
+ * @LastEditTime: 2025-03-03 15:27:53
+ * @descript: 自定义指令 - 直接导入的写法
  */
 import Vue from 'vue'
 

@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { forEach, hasOneOf, objEqual } from '@/libs/tools'
+import { forEach, objEqual } from '@/libs/tools'
 // cookie保存的天数
 import config from '@/config'
 const { title, cookieExpires, useI18n } = config
@@ -43,10 +43,7 @@ export const getSession = (k) => {
  * @returns {String} 处理后的字符串
  * @description 如果传入的数值位数只有1位，则在前面补充0
  */
-function addZero (n) {
-    n = n.toString();
-    return n.length <= 1 ? '0' + n : n;
-}
+
 export const formatDate = (date, type = 'date') => {
     if (!date) {
         return null
@@ -233,8 +230,8 @@ export function exportPdf(name, canvasList) {
             // 当前页面的剩余高度
             let blankHeight = a4Height - currentPos;
 
-             // zbx fnew
-             if (imgLeftHeight <= blankHeight) {
+            // zbx fnew
+            if (imgLeftHeight <= blankHeight) {
                 pdf.addImage(pageData, 'JPEG', 0, currentPos, imgWidth, imgHeight);
                 currentPos += imgHeight;
             } else {
@@ -286,22 +283,22 @@ export function windowPrint(id, zoom) {
 
 //将base64转换为blob对象 解决低版本浏览器兼容问题
 function dataURLtoBlob(dataurl) {
-	var arr = dataurl.split(',');
-	var bstr = atob(arr[1]);
-	var n = bstr.length;
-        var mime = arr[0].match(/:(.*?);/)[1]
-	var u8arr = new Uint8Array(n);
-	while(n--){
-		u8arr[n] = bstr.charCodeAt(n);
-	}
-	return new Blob([u8arr], {type: mime });
+    var arr = dataurl.split(',');
+    var bstr = atob(arr[1]);
+    var n = bstr.length;
+    var mime = arr[0].match(/:(.*?);/)[1]
+    var u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
 }
- 
+
 //将blob转换成file
-function blobToFile(theBlob, fileName){
-	theBlob.lastModifiedDate =new Date();
-	theBlob.name = fileName;
-	return theBlob;
+function blobToFile(theBlob, fileName) {
+    theBlob.lastModifiedDate = new Date();
+    theBlob.name = fileName;
+    return theBlob;
 }
 
 export const hasChild = (item) => {
@@ -828,3 +825,217 @@ export const parserPrize = (num, precision = 2) => {
     res = parseFloat(res).toFixed(precision);
     return res;
 }
+
+/**
+ * @description 判断要查询的数组是否至少有一个元素包含在目标数组中
+ */
+export const hasOneOf = (targetarr, arr) => {
+    return targetarr.some(_ => arr.indexOf(_) > -1)
+}
+/**
+ * @param {*} routeItem 路由
+ * @param {*} access    用户权限数组，如 ['super_admin', 'admin']
+ */
+
+export const hasPermission = (routeItem, access) => {
+    if (routeItem.meta && routeItem.meta.access && routeItem.meta.access.length) {
+        return hasOneOf(access, routeItem.meta.access)
+    }
+    else return true
+}
+
+/**
+ * @param {Array} routes 路由列表,
+ * @param {Array} access 用户权限数组，如 ['super_admin', 'admin']
+ */
+export const getMenuByRoutes = (routes, access) => {
+    let res = []
+    routes.forEach((item) => {
+        item.meta = item.meta || {}
+        if (!item.meta.hideInMenu && hasPermission(item, access)) {
+            let obj = {
+                name: item.name,
+                meta: item.meta,
+                icon: item.meta.icon || '',
+                href: item.meta.href || null
+            }
+            if (hasChild(item)) {
+                obj.children = getMenuByRoutes(item.children, access)
+            }
+            res.push(obj)
+        }
+    })
+    return res
+}
+
+
+
+
+
+
+
+
+/**
+ * @param {String} url
+ * @description 从URL中解析参数
+ */
+export const getParams = url => {
+    const keyValueArr = url.split('?')[1].split('&')
+    let paramObj = {}
+    keyValueArr.forEach(item => {
+        const keyValue = item.split('=')
+        paramObj[keyValue[0]] = keyValue[1]
+    })
+    return paramObj
+}
+
+
+
+
+
+
+
+
+
+export const localSave = (key, value) => {
+    localStorage.setItem(key, value)
+}
+
+export const localRead = (key) => {
+    return localStorage.getItem(key) || ''
+}
+
+
+
+// 获取用户信息
+
+export const getUserInfo = () => {
+    return getLocal("userInfo");
+};
+// 设置用户信息
+
+export const setUserInfo = val => {
+    setLocal("userInfo", val);
+};
+
+
+/*
+** @param date [String][Number] 时间 或 时间戳
+** @param type [String] 类型 date:日期 dateTime: 日期+时间 month: 'yyyy-mm
+*/
+// 格式化时间
+function addZero(n, len = 2) {
+    n = n.toString();
+    while (n.length < len) {
+        n = '0' + n
+    }
+    return n;
+}
+
+
+// 时间戳格式化为字符串 2023-04-15_00_00
+export const timeToStr = (time) => {
+    return formatDate(time, 'urlDate')
+};
+// 字符串 2023-04-15_00_00 转换为时间戳
+export const strToDate = (str) => {
+    if (!str) return null
+    let arr = str.split('_')
+    let timeStr = `${arr[0]} ${arr[1]}:${arr[2]}:${arr[3]}`
+    const date = new Date(timeStr)
+    return date
+};
+
+/*
+** list结构转map结构
+** @param list [Array] 待转换数组
+** @param keyName [String] list转map所需的key值
+*/
+export const listToMap = (list, keyName) => {
+    let hashMap = {};
+    for (let i = 0; i < list.length; i++) {
+        let key = list[i][keyName];
+        hashMap[key] = list[i];
+    }
+    return hashMap;
+}
+
+
+export const getQueryStr = query => {
+    let url = ''
+    if (query) {
+        let queryArr = [];
+        for (const key in query) {
+            if (query.hasOwnProperty(key) && (query[key] || query[key] == 0)) {
+                queryArr.push(`${key}=${query[key]}`)
+            }
+        }
+        if (url.indexOf('?') !== -1) {
+            url = `${url}&${queryArr.join('&')}`
+        } else {
+            url = `${url}?${queryArr.join('&')}`
+        }
+    }
+    return url
+
+}
+
+
+// 将读取的二进制图片，转为base64 URl可直接赋值给src
+export const blobToDataURL = (blob, callback) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+        // console.log('event', event)
+        let base64Url = event.target.result
+        // const base64Url = event.currentTarget.result
+        // const base64Url = event.srcElement.result
+        callback(base64Url)
+    }
+    reader.readAsDataURL(blob)
+}
+
+// 获取str中的参数并转换为map返回
+export const getParamsMap = (str) => {
+    let num
+    let ret = new Map()
+    var arr = str.split('&') // 各个参数放到数组里
+    console.log(window.location.href)
+    console.log(arr)
+    for (var i = 0; i < arr.length; i++) {
+        num = arr[i].indexOf('=')
+        console.log(arr[i].substring(0, num), arr[i].substr(num + 1))
+        if (num > 0) {
+            console.log(ret)
+            ret.set(arr[i].substring(0, num), arr[i].substr(num + 1))
+        }
+    }
+    return ret
+}
+
+const myReg = {
+    /**
+     * 手机号码校验
+     */
+    validatePhoneNumber: function(value) {
+        return !!(
+            value &&
+            value.toString().length === 11 &&
+            /^[1][3-9]\d{9}$/.test(value)
+        )
+    },
+    /**
+     * 手机号码校验，可为空
+     */
+    validatePhoneAllowEmpty: function(value) {
+        return (
+            !value ||
+            !!(
+                value &&
+                value.toString().length === 11 &&
+                /^[1][3-9]\d{9}$/.test(value)
+            )
+        )
+    }
+}
+export default myReg
+

@@ -1,7 +1,7 @@
 /*
  * @Date: 2023-12-07 09:45:12
  * @LastEditors: zbx
- * @LastEditTime: 2023-12-12 15:59:39
+ * @LastEditTime: 2025-03-03 16:08:58
  * @descript: 文件描述
  */
 const { defineConfig } = require('@vue/cli-service')
@@ -19,11 +19,10 @@ let plugins = isTest ? [
 ] : []
 const DateString = (new Date().getMonth() + 1) + '-' + new Date().getDate() + '_' + new Date().getHours() + new Date().getMinutes()
 
-const BASE_URL = process.env.VUE_APP_PUBLIC_PATH
 
 
 module.exports = defineConfig({
-    publicPath: BASE_URL,
+    publicPath: process.env.VUE_APP_PUBLIC_PATH,
     transpileDependencies: true,
     productionSourceMap: false,
     chainWebpack: config => {
@@ -39,10 +38,10 @@ module.exports = defineConfig({
         },
         optimization: {
             splitChunks: {
-               // 这表明将选择哪些 chunk 进行优化。当提供一个字符串，有效值为 all，async 和 initial。
-               // 设置为 all 可能特别强大，因为这意味着 chunk 可以在异步和非异步 chunk 之间共享。
-                chunks: 'async', 
-                minSize: 5*1024,
+                // 这表明将选择哪些 chunk 进行优化。当提供一个字符串，有效值为 all，async 和 initial。
+                // 设置为 all 可能特别强大，因为这意味着 chunk 可以在异步和非异步 chunk 之间共享。
+                chunks: 'async',
+                minSize: 5 * 1024,
                 // minRemainingSize: 0,
                 minChunks: 1,
                 maxAsyncRequests: 30,
@@ -76,7 +75,7 @@ module.exports = defineConfig({
                         reuseExistingChunk: true,
                         chunks: 'async',
                     },
-                  
+
                 }
             }
         }
