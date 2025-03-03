@@ -1,0 +1,369 @@
+@import "~view-design/src/styles/index.less";
+// 主题颜色覆盖 
+@menu-dark-title: #001529;
+@menu-dark-active-bg: #000c17;
+@layout-sider-background: #fff;
+
+@primary-color: #ff6600;
+@info-color: #ec662d;
+@link-color: #ff6600;
+@title-color: #323233;
+@text-color: #323233;
+
+html,
+body {
+    font-family: "微软雅黑", "微软雅黑 Bold", "微软雅黑 Regular" !important;
+    color: #333333;
+}
+
+.bgwhite {
+    background-color: #fff;
+}
+
+.greyBorder {
+    border-bottom: 1px solid #eee;
+}
+
+.clearfix::before,
+.clearfix::after {
+    content: "";
+    display: table;
+}
+
+.clearfix::after {
+    clear: both;
+}
+
+.clearfix {
+    zoom: 1;
+}
+
+
+// 超出用省略号
+.textOverflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// 设计师统一样式
+
+// 文本链接
+.text-link {
+    font-family: "PingFangSC-Regular";
+    font-size: 14px;
+    color: #ff6600;
+    line-height: 20px;
+    font-weight: 400;
+    cursor: pointer;
+
+    &:hover {
+        color: #ff751a;
+        background: #f7f8fa;
+        border-radius: 4px;
+    }
+
+    &:active {
+        color: #e55b00;
+        background: #f7f8fa;
+        border-radius: 4px;
+    }
+}
+
+.text-link-disable {
+    color: #c8c9cc;
+}
+
+// table
+.ivu-table {
+    font-size: 14px;
+    color: #323233;
+
+    .ivu-table-header th {
+        font-family: "PingFangSC-Medium";
+        background: #f7f8fa;
+    }
+
+    .ivu-table-body td {
+        font-family: "PingFangSC-Regular";
+        background: #ffffff;
+        border: none; // 去掉默认的下划线
+        box-shadow: inset 0 -1px 0 0 #ebedf0;
+    }
+
+    .ivu-table-cell {
+        padding: 0 5px; //缩小全部单元格间距
+    }
+}
+
+// page 选中页码，添加背景填充,字体颜色变白
+.ivu-page-item-active {
+    background: #ff6600;
+
+    & a,
+    &:hover a {
+        color: #ffffff;
+    }
+}
+
+// modal 弹窗
+.ivu-modal {
+    font-family: "PingFangSC-Regular";
+
+    .ivu-modal-header {
+        .ivu-modal-header-inner {
+            font-size: 14px;
+            font-family: "PingFangSC-Medium";
+        }
+    }
+
+    .ivu-modal-body {
+        padding: 24px 10px 10px;
+    }
+
+    .ivu-modal-footer {
+        border: none;
+        padding: 0px 16px 24px;
+    }
+}
+
+// 表单间距
+.ivu-form-inline .ivu-form-item {
+    margin-right: 24px;
+}
+
+// Menu
+.ivu-menu {
+
+    .ivu-menu-item.ivu-menu-item-selected,
+    .ivu-menu-item.ivu-menu-item-selected:hover {
+        color: #ff6600;
+        background: rgba(255, 102, 0, 0.1) !important;
+    }
+
+    .ivu-menu-item:hover {
+        color: #ff6600 !important;
+        background: none !important;
+    }
+}
+
+li {
+    list-style: none;
+}
+
+.center {
+    text-align: center;
+    vertical-align: center;
+}
+
+.flex {
+    box-sizing: border-box;
+    display: -webkit-box;
+    display: box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-pack: justify;
+}
+
+.flex-item {
+    min-width: 0;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+}
+
+// 表格斜线的header头的样式初始化
+.em-line-head .ivu-table-cell {
+    padding: 0;
+    display: block;
+}
+
+// 统一标题，如已审核，待审核等
+.em-title {
+    font-size: 16px;
+    color: #333;
+}
+
+// 左浮动
+.em-fl {
+    float: left;
+}
+
+// 右浮动
+.em-fr {
+    float: right;
+}
+
+.cursorPointer {
+    cursor: pointer;
+}
+
+.whiteFont {
+    color: #fff;
+}
+
+.orangeFont {
+    color: #f60;
+}
+
+.fontW700 {
+    font-weight: 700;
+}
+
+.font12 {
+    font-size: 12px;
+}
+
+.font14 {
+    font-size: 14px;
+}
+
+.font16 {
+    font-size: 16px;
+}
+
+.font18 {
+    font-size: 18px;
+}
+
+.font20 {
+    font-size: 20px;
+}
+
+.font32 {
+    font-size: 32px;
+}
+
+.mt10 {
+    margin-top: 10px;
+}
+
+.ml10 {
+    margin-left: 10px;
+}
+
+.mr10 {
+    margin-right: 10px;
+}
+
+.mb10 {
+    margin-bottom: 10px;
+}
+
+.ml15 {
+    margin-left: 15px;
+}
+
+.m15 {
+    margin: 15px;
+}
+
+.mt20 {
+    margin-top: 20px;
+}
+
+.ml20 {
+    margin-left: 20px;
+}
+
+.mr20 {
+    margin-right: 20px;
+}
+
+.mb20 {
+    margin-bottom: 20px;
+}
+
+.mt30 {
+    margin-top: 30px;
+}
+
+.mt50 {
+    margin-top: 50px;
+}
+
+.col-item {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    // align-items: center;
+}
+
+.label-txt {
+    display: inline-block;
+    margin-right: 10px;
+    width: 100px;
+    text-align: right;
+}
+
+.label-con {
+    display: inline-block;
+    line-height: 1;
+    padding: 10px 12px 10px 0;
+}
+
+.wd200 {
+    width: 200px;
+}
+
+.wd250 {
+    width: 250px;
+}
+
+.btnRow {
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 120px;
+}
+
+.em-form-title {
+    display: inline-block;
+    line-height: 24px;
+    font-size: 16px;
+    color: #17233d;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 10px;
+    vertical-align: middle;
+}
+
+.ivu-table-cell {
+    padding: 0 8px;
+}
+
+// 金额输入框
+.em-prize .ivu-input-number-input {
+    text-align: right;
+    /* padding-right: 28px; */
+}
+
+.em-prize .ivu-input-number-handler-wrap {
+    display: none;
+}
+
+// 修改disabled的样式使之更加清晰
+.ivu-input-number-input[disabled] {
+    color: #333;
+}
+
+.ivu-input[disabled],
+fieldset[disabled] {
+    color: #333;
+}
+
+.ivu-select-disabled .ivu-select-selection {
+    color: #333;
+}
+
+.ivu-select-input[disabled] {
+    color: #333;
+    -webkit-text-fill-color: #333;
+}
+
+.ivu-message {
+    top: 70px !important;
+}
