@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-07 11:16:03
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-03 15:49:23
+ * @LastEditTime: 2025-03-03 19:00:58
  * @FilePath: \management\src\router\index.js
  */
 import Vue from 'vue'
@@ -84,7 +84,7 @@ const permissionHook = (to, access, next) => {
 }
 
 router.afterEach(to => {
-    // iView.LoadingBar.finish()
+    iView.LoadingBar.finish()
     window.scrollTo(0, 0)
     setTitle(to, router.app)
 })

@@ -192,8 +192,8 @@ export default {
 		// console.log('本地存储的',loginInfo);
 
 		this.pageForm = {
-			username: loginInfo.username || "admin",
-			password: loginInfo.password || "",
+			username: loginInfo.username || "zbx",
+			password: loginInfo.password || "123456",
 			code: "",
 			key: "",
 		};
