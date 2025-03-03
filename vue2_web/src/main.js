@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-06 10:08:02
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-03 16:51:38
+ * @LastEditTime: 2025-03-03 19:59:02
  * @FilePath: \management\src\main.js
  */
 
@@ -20,9 +20,9 @@ import {  Message } from "view-design";
 Vue.use(iView, { i18n: (key, value) => i18n.t(key, value) })
 
 
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-Vue.use(ElementUI) // 引入ui框架
+// import ElementUI from 'element-ui';
+// import 'element-ui/lib/theme-chalk/index.css';
+// Vue.use(ElementUI) // 引入ui框架
 
 import './assets/globalcss.css'
 import './assets/globalless.less'

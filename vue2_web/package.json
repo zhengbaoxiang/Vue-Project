@@ -10,6 +10,8 @@
     "build:prod": "vue-cli-service build --mode production",
     "build:report": "vue-cli-service build --mode testing --report",
     "build": "cnpm install && vue-cli-service build",
+    "postbuild": "node ./zip.js",
+    "build7zip":"7z a -tzip dist.zip dist/*",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e"
