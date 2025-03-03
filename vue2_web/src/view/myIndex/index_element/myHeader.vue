@@ -37,7 +37,7 @@ export default {
             this.dateStr = value
             this.fnTimeleft(value)
             clearInterval(this.timer)
-            this.timer = setInterval(this.fnTimeleft, 60000)
+            this.timer = setInterval(this.fnTimeleft, 60*1000)
         },
         fnTimeleft(dateStr) {
             dateStr = dateStr || this.dateStr
@@ -57,17 +57,17 @@ export default {
             // 计算还剩多少秒
             // var iSeconds = sLeft % 60
             var sTr =
-                `距离${dateStr}还剩:<strong>${iDays}</strong>天${this.fnTodou(
+                `距离${dateStr}还剩:<strong>${iDays}</strong>天${this.addZero(
                     iHours
-                )}时` + `${this.fnTodou(iMinutes)}分`
+                )}时` + `${this.addZero(iMinutes)}分`
             this.timeStr = sTr
         },
-        fnTodou(n) {
-            if (n < 10) {
-                return '0' + n
-            } else {
-                return n
+        addZero(n, len = 2) {
+            n = n.toString();
+            while (n.length < len) {
+                n = '0' + n
             }
+            return n;
         }
     }
 }

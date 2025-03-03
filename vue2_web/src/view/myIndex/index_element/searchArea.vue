@@ -1,3 +1,9 @@
+<!--
+ * @Date: 2025-03-03 16:41:18
+ * @LastEditors: zbx
+ * @LastEditTime: 2025-03-03 19:30:31
+ * @descript: 文件描述
+-->
 <template>
     <div class="searchArea">
         <form
@@ -37,15 +43,17 @@ export default {
 <style lang="less" scoped>
 .searchArea {
     width: 100%;
-    margin: 5% auto 0px;
-    width: 30%;
+    margin: 0 auto;
+    padding-top: 5%;
+    width: 35%;
     min-width: 330px;
+    max-width: 650px;
 
     .search_form {
         display: inline-block;
         width: 100%;
-        height: 40px;
-        line-height: 40px;
+        height: 45px;
+        line-height: 45px;
 
         font-size: 0;
         border: 2px solid rgba(0, 144, 252, 1);
@@ -54,21 +62,21 @@ export default {
         overflow: hidden;
         a {
             display: inline-block;
-            height: 30px;
+            height: 100%;
             width: 30px;
-            margin: 5px 12px;
+            margin: 0 12px;
             vertical-align: middle;
             background: url('../../../assets/images/baidu.png') center -2px no-repeat;
             background-size: cover;
         }
         #input_con {
             display: inline-block;
-            vertical-align: bottom;
-            height: 38px;
+            vertical-align: middle;
+            height: 100%;
             width: ~"calc(100% - 65px)";
-            margin: 1px 0 0 5px;
+            margin: 0  5px;
             padding: 0px 0px;
-            font: normal 16px/37px 'KaiTi';
+            font: normal 18px/37px 'KaiTi';
             color: rgba(51, 51, 51, 1);
             /*/* 去掉获得焦点(点击)时显示的蓝色的框   */
             outline: none;

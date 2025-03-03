@@ -54,7 +54,7 @@ export default {
 .navtoolbar {
     position: absolute;
     top: 20px;
-    right: 20px;
+    left: 20px;
     span {
         background-color: #ff8800;
     }

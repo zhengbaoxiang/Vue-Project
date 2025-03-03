@@ -1,7 +1,7 @@
 <!--
  * @Date: 2025-03-03 16:41:18
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-03 17:14:30
+ * @LastEditTime: 2025-03-03 19:42:35
  * @descript: 文件描述
 -->
 <template>
@@ -24,25 +24,37 @@
                 </ol>
             </div>
         </div>
-        <div class="overlay  " v-if="showPopup">
-            <div class="popup">
-                <input
-                    type="text"
-                    name="title"
-                    v-model="currentData.title"
-                    autocomplete="off"
-                    placeholder="标题"
-                    autofocus
-                />
-                <input
-                    type="text"
-                    name="url"
-                    v-model="currentData.url"
-                    autocomplete="off"
-                    placeholder="网址"
-                />
-                <button @click="cancel">取消</button>
-                <button @click="confirm(currentData)">添加</button>
+        <div v-if="showPopup" class="overlay" :class="{ active: showPopup }" @click="cancel">
+            <div class="drawer" @click.stop>
+                <form @submit.prevent="confirm(currentData)">
+                    <div class="form-group">
+                        <label for="title">标题</label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            v-model="currentData.title"
+                            autocomplete="off"
+                            placeholder="标题"
+                            autofocus
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="url">网址</label>
+                        <input
+                            type="text"
+                            id="url"
+                            name="url"
+                            v-model="currentData.url"
+                            autocomplete="off"
+                            placeholder="网址"
+                        />
+                    </div>
+                    <div class="button-group">
+                        <button type="button" @click="cancel">取消</button>
+                        <button type="submit">添加</button>
+                    </div>
+                </form>
             </div>
         </div>
     </section>
@@ -242,7 +254,7 @@ section.main_con {
     }
 
     .overlay {
-        background: rgba(25, 25, 25, 0.3) no-repeat repeat;
+        background: rgba(25, 25, 25, 0.3);
         position: fixed;
         left: 0;
         top: 0;
@@ -250,33 +262,63 @@ section.main_con {
         width: 100%;
         margin: auto;
         z-index: 100;
-        .popup {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        &.active {
+            opacity: 1;
+        }
+        .drawer {
             position: fixed;
-            margin: auto;
-            top: 35%;
-            left: 50%;
-            transform: translate(-50%);
-            width: 500px;
-            padding: 10px;
-            background: white url('../../../assets/images/noise.png') repeat;
-            border-color: rgb(154, 159, 164);
-            border-radius: 10px;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 300px;
+            padding: 20px;
+            background: white;
             box-shadow: rgba(0, 0, 0, 0.85) 0 0 6px 0;
             z-index: 1000;
-            input {
-                display: block;
-                margin: 20px 20px 3px;
-                padding: 1px 5px;
-                width: 90%;
-                height: 30px;
-                border: 0.5px solid grey;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            form {
+                display: flex;
+                flex-direction: column;
+                .form-group {
+                    margin-bottom: 15px;
+                    label {
+                        display: block;
+                        margin-bottom: 5px;
+                        font-weight: bold;
+                    }
+                    input {
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                    }
+                }
+                .button-group {
+                    display: flex;
+                    justify-content: flex-end;
+                    button {
+                        padding: 10px 20px;
+                        margin-left: 10px;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        &:first-child {
+                            background-color: #f5f5f5;
+                            color: #333;
+                        }
+                        &:last-child {
+                            background-color: #007bff;
+                            color: #fff;
+                        }
+                    }
+                }
             }
-            button {
-                width: 80px;
-                height: 30px;
-                margin: 15px 0 20px 20px;
-                padding: 0px;
-            }
+        }
+        &.active .drawer {
+            transform: translateX(0);
         }
     }
 }

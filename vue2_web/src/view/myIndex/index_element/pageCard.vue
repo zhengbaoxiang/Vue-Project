@@ -107,7 +107,7 @@ export default {
     .head_btn {
         display: none;
         position: absolute;
-        z-index: 10;
+        z-index: 100;
         width: 100%;
         height: 24px;
         top: -10px;
@@ -164,7 +164,8 @@ export default {
             border-radius: 50%;
             border: 1px solid #d8d8d8;
             overflow: hidden;
-            z-index: 10
+            z-index: 1;
+            
         }
         .content.empty {
             /*没有标签用虚线*/
