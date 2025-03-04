@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-06 10:08:02
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-03 19:59:02
+ * @LastEditTime: 2025-03-04 13:36:10
  * @FilePath: \management\src\main.js
  */
 
@@ -50,10 +50,7 @@ Message.config({
 installPlugin(Vue)
 
 // 实际打包时应该不引入mock ,引起导出报错   responseType: 'blob'
-// if (process.env.NODE_ENV !== 'production') require('@/mock')
 require('@/mock')
-
-
 
 //  1 vue的全局消息推送，单页面内部通信
 window.$Bus = new Vue()

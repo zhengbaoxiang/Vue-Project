@@ -18,7 +18,7 @@ const isTest = process.env.VUE_APP_ENV === "testing"
 const isProduction = process.env.NODE_ENV === 'production' // 判断是否是生产环境
 const publicPath = process.env.VUE_APP_PUBLIC_PATH
 
-const DateString = (new Date().getMonth() + 1) + '-' + new Date().getDate() + '_' + new Date().getHours()+ '_' + new Date().getMinutes()
+const DateString = (new Date().getMonth() + 1) + '-' + new Date().getDate() + '_' + new Date().getHours() + '_' + new Date().getMinutes()
 
 // 分析打包大小使用默认配置  
 let plugins = isTest ? [
@@ -33,26 +33,25 @@ let cdn = {
     js: []
 }
 
+// 4 本地开发时用包,打包时排除,生产环境使用cdn，cdn不一定快，要看网络情况
+// if (isProduction) {
+//     externals = {
+//         echarts: 'echarts',
+//     }
+//     cdn = {
+//         css: [
+//             'https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.0/theme-chalk/index.min.css' // element-ui css 样式表
+//         ],
+//         js: [
+//             // 'https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js', // vuejs
+//             // 'https://cdn.bootcdn.net/ajax/libs/element-ui/2.6.0/index.js', // element-ui js
+//             // 'https://cdn.bootcdn.net/ajax/libs/element-ui/2.6.0/locale/zh-CN.min.js',
+//             'https://cdn.bootcdn.net/ajax/libs/echarts/5.3.2/echarts.min.js',
+//         ]
+//     }
+// }
 
-// 4 本地开发时用包,打包时排除,生产环境使用cdn
-if (isProduction) {
-    externals = {
-        echarts: 'echarts',
-    }
-    cdn = {
-        css: [
-            'https://cdn.bootcdn.net/ajax/libs/element-ui/2.15.0/theme-chalk/index.min.css' // element-ui css 样式表
-        ],
-        js: [
-            // 'https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js', // vuejs
-            // 'https://cdn.bootcdn.net/ajax/libs/element-ui/2.6.0/index.js', // element-ui js
-            // 'https://cdn.bootcdn.net/ajax/libs/element-ui/2.6.0/locale/zh-CN.min.js',
-            'https://cdn.bootcdn.net/ajax/libs/echarts/5.3.2/echarts.min.js',
-        ]
-    }
-}
-
-module.exports = defineConfig({
+module.exports = {
     publicPath: publicPath,
     lintOnSave: false,
     transpileDependencies: true,
@@ -88,7 +87,6 @@ module.exports = defineConfig({
         // <link rel="prefetch"> 是一种 resource hint，用来告诉浏览器在页面加载完成后，利用空闲时间提前获取用户未来可能会访问的内容。
         // 移除 prefetch 插件
         // config.plugins.delete('prefetch')
-
         config.resolve.alias
             .set('@', resolve('src')) // key,value自行定义，比如.set('@@', resolve('src/components'))
             .set('_c', resolve('src/components'))
@@ -99,100 +97,69 @@ module.exports = defineConfig({
             console.log('->', cdn, '<');
             return args
         })
-        // 例如,如不使用此方法,而是全部引入的话,本地调试时引入cdn资源会略慢,
+        // 例如,如不使用此方法,而是全部引入的话,本地调试时引入cdn资源会略慢,index.html中引入
         // <% for(var js of htmlWebpackPlugin.options.cdn.js) { %>
         //    <script src="<%=js%>"></script>
         // <% } %>
-
-
-
-        // 3 代码分离 需要权衡，并不是拆碎了更好,跟宽带也有关。因此暂不启用
-        // config.optimization.splitChunks({
-        //     cacheGroups: {
-        //         common: {
-        //             name: 'chunk-common', // 打包后的文件名
-        //             chunks: 'all', // 
-        //             minChunks: 2,
-        //             maxInitialRequests: 5,
-        //             minSize: 0,
-        //             priority: 1,
-        //             reuseExistingChunk: true
-        //         },
-        //         vendors: {
-        //             name: 'chunk-vendors',
-        //             test: /[\\/]node_modules[\\/]/,
-        //             chunks: 'all',
-        //             priority: 2,
-        //             reuseExistingChunk: true,
-        //             enforce: true
-        //         },
-        //         iView: {
-        //             name: "chunk-iView",
-        //             test: /[\\/]node_modules[\\/]view-design[\\/]/,
-        //             priority: 4,
-        //             chunks: "all",
-        //             reuseExistingChunk: true,
-        //             enforce: true
-        //         },
-        //         mockjs: {
-        //             name: "chunk-mockjs",
-        //             test: /[\\/]node_modules[\\/]mockjs[\\/]/,
-        //             priority: 4,
-        //             chunks: "all",
-        //             priority: 3,
-        //             reuseExistingChunk: true,
-        //             enforce: true
-        //         },
-        //         echarts: {
-        //             name: "chunk-echarts",
-        //             test: /[\\/]node_modules[\\/]echarts[\\/]/,
-        //             priority: 4,
-        //             chunks: "all",
-        //             reuseExistingChunk: true,
-        //             enforce: true
-        //         },
-        //     }
-        // })
 
     },
     // 调整 webpack 配置 
     configureWebpack: {
         output: { // 输出重构  打包编译后的 文件名称  【模块名称.版本号.时间戳】
-            // filename: `[name].${process.env.VUE_APP_Version}.${Timestamp}.js`,
-            filename: `js/[name]_${DateString}_f.js`,       // 此选项决定了每个输出 bundle 的名称
-            chunkFilename: `js/[name]_${DateString}_com.js` // 此选项决定了非初始（non-initial）chunk 文件的名称 ；比如路由加载组件
+            // filename: 'js/[name].[contenthash:8].js',
+            // // filename: `js/[name]_${DateString}_f.js`,       // 此选项决定了每个输出 bundle 的名称
+            // chunkFilename: `js/[name]_${DateString}_com.js` // 此选项决定了非初始（non-initial）chunk 文件的名称 ；比如路由加载组件
+            // 动态名称可能存在问题
+            // Webpack 的缓存机制失效，认为每次都是新文件
+            // 某些插件或配置（如 splitChunks）会触发二次构建，从而生成两份文件
         },
 
+        // 插件配置，打包分析工具
         plugins: plugins,
         // 如打包时无需排除资源,则去掉externals
         externals: externals,
         optimization: {
+            // 代码分离 需要权衡，并不是拆碎了更好,跟宽带也有关
             splitChunks: {
                 // 这表明将选择哪些 chunk 进行优化。当提供一个字符串，有效值为 all，async 和 initial。
                 // 设置为 all 可能特别强大，因为这意味着 chunk 可以在异步和非异步 chunk 之间共享。
                 chunks: 'async',
-                minSize: 5 * 1024,
+                minSize: 20000,
                 // minRemainingSize: 0,
                 minChunks: 1,
-                maxAsyncRequests: 30,
+                maxAsyncRequests: 6,
                 maxInitialRequests: 5,
                 enforceSizeThreshold: 50000,
                 cacheGroups: {
                     // 默认配置之后，自定义
+                    default: {
+                        name: 'chunk-common', // 打包后的文件名
+                        minChunks: 2,
+                        priority: 10,
+                        reuseExistingChunk: true,
+                        chunks: 'all', // 
+                    },
+                    defaultVendors: {
+                        name: 'vendors-async',
+                        test: /[\\/]node_modules[\\/]/,
+                        priority: 0,
+                        reuseExistingChunk: true,
+                        chunks: 'async',
+                    },
                     element: {
                         name: "element-ui",
                         test: /[\\/]element-ui[\\/]/,
-                        chunks: "all",
                         priority: 20,
                         reuseExistingChunk: true,
+                        chunks: "all",
                     },
                     iView: {
                         name: "iView",
                         test: /[\\/]view-design[\\/]/,
-                        chunks: "all",
                         priority: 20,
                         reuseExistingChunk: true,
-                        enforce: true
+                        enforce: true,
+                        chunks: "all",
                     },
                     mockjs: {
                         name: "chunk-mockjs",
@@ -205,29 +172,11 @@ module.exports = defineConfig({
                     echarts: {
                         name: "chunk-echarts",
                         test: /[\\/]node_modules[\\/]echarts[\\/]/,
-                        chunks: "all",
                         priority: 4,
                         reuseExistingChunk: true,
-                        enforce: true
+                        enforce: true,
+                        chunks: "all",
                     },
-                    common: {
-                        name: 'chunk-common', // 打包后的文件名
-                        chunks: 'all', // 
-                        minChunks: 2,
-                        maxInitialRequests: 5,
-                        minSize: 0,
-                        priority: 1,
-                        reuseExistingChunk: true
-                    },
-                    vendors: {
-                        name: 'chunk-vendors',
-                        test: /[\\/]node_modules[\\/]/,
-                        chunks: 'all',
-                        priority: 2,
-                        reuseExistingChunk: true,
-                        enforce: true
-                    },
-
 
                 }
             }
@@ -255,7 +204,7 @@ module.exports = defineConfig({
                     }
                 }
             ]
-        },
+        }
     },
 
     // 有的时候你想要向 webpack 的预处理器 loader 传递选项。
@@ -292,4 +241,4 @@ module.exports = defineConfig({
         }
     }
 
-})
+}

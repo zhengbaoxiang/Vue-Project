@@ -1,10 +1,14 @@
 @echo off
+cd /d %~dp0
 
-start /min cmd /k "cd /d %~dp0&&npm run dev"
+:: 直接运行
+npm run dev
+
+:: 新开一个最小化窗口运行服务
+@REM start /min cmd /c "npm run dev"
 
 if errorlevel 1 (
-    echo webpack server Failed
-) else (
-    echo webpack server start success
-
+    echo Failed to start webpack server
+    pause
+    exit /b %errorlevel%
 )
