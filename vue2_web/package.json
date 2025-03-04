@@ -10,7 +10,7 @@
     "build:prod": "vue-cli-service build --mode production && npm run build7zip",
     "build:report": "vue-cli-service build --mode testing --report",
     "build": "cnpm install && vue-cli-service build",
-    "zip":"node ./zip.js",
+    "zip": "node ./zip.js",
     "build7zip": "7z a -tzip dist.zip dist/*",
     "test:e2e": "vue-cli-service test:e2e"
   },
