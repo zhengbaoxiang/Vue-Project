@@ -1,4 +1,3 @@
-const { defineConfig } = require('@vue/cli-service')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 
 const path = require('path')
@@ -54,7 +53,6 @@ let cdn = {
 module.exports = {
     publicPath: publicPath,
     lintOnSave: false,
-    transpileDependencies: true,
     productionSourceMap: false,
     // 这里写你调用接口的基础路径，来解决跨域，如果设置了代理，那你本地开发环境的axios的baseUrl要写为 '' ，即空字符串
     devServer: {
@@ -107,8 +105,8 @@ module.exports = {
     configureWebpack: {
         output: { // 输出重构  打包编译后的 文件名称  【模块名称.版本号.时间戳】
             // filename: 'js/[name].[contenthash:8].js',
-            // // filename: `js/[name]_${DateString}_f.js`,       // 此选项决定了每个输出 bundle 的名称
-            // chunkFilename: `js/[name]_${DateString}_com.js` // 此选项决定了非初始（non-initial）chunk 文件的名称 ；比如路由加载组件
+            filename: `js/[name]_${DateString}_f.js`,       // 此选项决定了每个输出 bundle 的名称
+            chunkFilename: `js/[name]_${DateString}_com.js` // 此选项决定了非初始（non-initial）chunk 文件的名称 ；比如路由加载组件
             // 动态名称可能存在问题
             // Webpack 的缓存机制失效，认为每次都是新文件
             // 某些插件或配置（如 splitChunks）会触发二次构建，从而生成两份文件
@@ -124,33 +122,20 @@ module.exports = {
                 // 这表明将选择哪些 chunk 进行优化。当提供一个字符串，有效值为 all，async 和 initial。
                 // 设置为 all 可能特别强大，因为这意味着 chunk 可以在异步和非异步 chunk 之间共享。
                 chunks: 'async',
-                minSize: 20000,
+                minSize: 20 * 1024,  // 20KB 以下的模块不拆分
                 // minRemainingSize: 0,
-                minChunks: 1,
-                maxAsyncRequests: 6,
-                maxInitialRequests: 5,
+                minChunks: 1, // 要形成一个新 chunk，至少需要被多少个 chunk 引用
+                maxAsyncRequests: 6,// 按需加载时的最大并行请求数
+                maxInitialRequests: 4, // 入口点处的最大并行请求
                 enforceSizeThreshold: 50000,
                 cacheGroups: {
                     // 默认配置之后，自定义
-                    default: {
-                        name: 'chunk-common', // 打包后的文件名
-                        minChunks: 2,
-                        priority: 10,
+                    vue: {
+                        name: 'vue',
+                        test: /[\\/]node_modules[\\/](vue|vue-router|vuex)[\\/]/,
+                        priority: 40,
                         reuseExistingChunk: true,
-                        chunks: 'all', // 
-                    },
-                    defaultVendors: {
-                        name: 'vendors-async',
-                        test: /[\\/]node_modules[\\/]/,
-                        priority: 0,
-                        reuseExistingChunk: true,
-                        chunks: 'async',
-                    },
-                    element: {
-                        name: "element-ui",
-                        test: /[\\/]element-ui[\\/]/,
-                        priority: 20,
-                        reuseExistingChunk: true,
+                        enforce: true,
                         chunks: "all",
                     },
                     iView: {
@@ -162,22 +147,58 @@ module.exports = {
                         chunks: "all",
                     },
                     mockjs: {
-                        name: "chunk-mockjs",
+                        name: "mockjs",
                         test: /[\\/]node_modules[\\/]mockjs[\\/]/,
-                        chunks: "all",
-                        priority: 4,
-                        reuseExistingChunk: true,
-                        enforce: true
-                    },
-                    echarts: {
-                        name: "chunk-echarts",
-                        test: /[\\/]node_modules[\\/]echarts[\\/]/,
-                        priority: 4,
+                        priority: 20,
                         reuseExistingChunk: true,
                         enforce: true,
                         chunks: "all",
                     },
-
+                    echarts: {
+                        name: "echarts",
+                        test: /[\\/]node_modules[\\/]echarts[\\/]/,
+                        priority: 20,
+                        reuseExistingChunk: true,
+                        enforce: true,
+                        chunks: "all",
+                    },
+                    element: {
+                        name: "element-ui",
+                        test: /[\\/]element-ui[\\/]/,
+                        priority: 20,
+                        reuseExistingChunk: true,
+                        chunks: "all",
+                    },
+                    threeD: {
+                        name: "threeD",
+                        test: /[\\/]node_modules[\\/]three[\\/]/,
+                        priority: 20,
+                        reuseExistingChunk: true,
+                        enforce: true,
+                        chunks: "all",
+                    },
+                    vendorsAsync: {
+                        name: 'vendors-async',
+                        test: /[\\/]node_modules[\\/]/,
+                        priority: 10,
+                        reuseExistingChunk: true,
+                        chunks: 'async',
+                    },
+                    Vendors: {
+                        name: 'vendors',
+                        test: /[\\/]node_modules[\\/]/,
+                        priority: 10,
+                        reuseExistingChunk: true,
+                        chunks: 'all',
+                    },
+                    default: {
+                        name: 'common', // 打包后的文件名
+                        minChunks: 2, // 模块至少被引用2次，才会打包进这个公共块
+                        priority: 0,
+                        reuseExistingChunk: true,
+                        enforce: true,
+                        chunks: 'all', // 
+                    },
                 }
             }
         },

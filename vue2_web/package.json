@@ -10,6 +10,7 @@
     "build:prod": "vue-cli-service build --mode production && npm run build7zip",
     "build:report": "vue-cli-service build --mode testing --report",
     "build": "cnpm install && vue-cli-service build",
+    "zip":"node ./zip.js",
     "build7zip": "7z a -tzip dist.zip dist/*",
     "test:e2e": "vue-cli-service test:e2e"
   },
@@ -35,10 +36,8 @@
   "devDependencies": {
     "@babel/polyfill": "^7.2.5",
     "@vue/babel-preset-app": "^3.3.0",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-router": "~5.0.0",
-    "@vue/cli-plugin-vuex": "~5.0.0",
-    "@vue/cli-service": "~3.0.0",
+    "@vue/cli-plugin-babel": "^3.0.1",
+    "@vue/cli-service": "^3.0.1",
     "chai": "^4.1.2",
     "less": "^2.7.3",
     "less-loader": "^4.0.5",
