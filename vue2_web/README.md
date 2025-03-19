@@ -1,12 +1,12 @@
 <!--
  * @Date: 2021-11-18 10:05:14
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-04 13:26:54
+ * @LastEditTime: 2025-03-05 19:29:17
  * @FilePath: \management\README.md
 -->
 ## Introduction
 
-    前端vue2 整合项目
+    前端vueCli + vue2 + iView 整合项目
 
 ## Features
 
