@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>VUE组件</title>
+    <!-- <script type="text/javascript" src="vue.js"></script> -->
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16"></script> -->
+    <!-- <link rel="stylesheet" href="bootstrap.css"> -->
+    <style> </style>
+</head>
+
+<body>
+    <!--被控制的元素  也就是MVVM 中的 V-->
+    <div id="app">
+        <div class="container">
+            <div class="cart">
+                <div class=title>我的购物车</div>
+                <div v-for="item in list" :key=item.id class="item">
+                    <span class="name">{{item.name}}</span>
+                    <span class="change">
+                        <button>-</button>
+                        <input type="text" class="num" v-model="item.num">
+                        <button>+</button>
+                    </span>
+                    <span>|</span>
+                    <button class="del" @click="del(item.id)">del</button>
+                </div>
+                <div class="total">
+                    <span>总价：{{total}}</span>
+                    <button>结算</button>
+                </div>
+            </div>
+        </div>
+        <hr>
+
+        <mycart></mycart>
+    </div>
+    <script>
+
+        let cartTitle = {
+            template: `<div class=title>我的购物车_{{user}}</div>`,
+            props: ['user'],
+            data() {
+                return {}
+            },
+        }
+
+        let cartList = {
+            template: `
+                <div>
+                <div :key=item.id v-for="item in list"  class="item">
+                    <span class="name">{{item.name}}</span>
+                    <span class="change">
+                    <button @click="reduceNum(item.id)">-</button>
+                    <input type="text" class="num" @blur="changeNum(item.id,$event)" :value="item.num">
+                    <button @click="addNum(item.id)">+</button>
+                    </span>
+                    <button class="del" @click="del(item.id)">del</button>
+                </div>
+                </div>`,
+            props: ['list'],
+            data() {
+                return {}
+            },
+            methods: {
+                del(id) {
+                    //让父组件删除
+                    this.$emit('deldata', id)
+                },
+                changeNum(id, event) {
+                    // console.log(event)
+                    let par = { id: id, value: event.target.value, type: 'change' }
+                    this.$emit('PchangeNum', par)
+                },
+                addNum(id) {
+                    let par = { id: id, type: 'add' }
+                    this.$emit('PchangeNum', par)
+                },
+                reduceNum(id) {
+                    let par = { id: id, type: 'sub' }
+                    this.$emit('PchangeNum', par)
+                }
+            },
+        }
+
+        let cartTotal = {
+            template: `
+                <div class="total">
+                <span>总价：{{total}}</span>
+                <button >结算</button>
+            </div>`,
+            props: ['total'],
+            data() {
+                return {}
+            },
+        }
+
+        //定义一个全局组件,来声明三个私有子组件
+        Vue.component('mycart', {
+            template: `
+                <div class="cart">
+                    <cartTitle :user="user"></cartTitle>
+                    <cartList :list=list @deldata="delCart($event)" @PchangeNum="changeNum($event)"></cartList>
+                    <cartTotal :total="total"></cartTotal>
+                </div>
+                `,
+            components: {
+                //三个子组件
+                cartTitle: cartTitle,
+                cartList: cartList,
+                cartTotal: cartTotal
+            },
+            data() {
+                return {
+                    user: 'Neo',
+                    list: [
+                        { id: 1, name: '苹果1', num: 2, price: 5000 },
+                        { id: 2, name: '华为2', num: 2, price: 3000 },
+                        { id: 3, name: '小米3', num: 2, price: 1000 },
+                        { id: 4, name: '三星4', num: 2, price: 2000 }
+                    ],
+                }
+            },
+            computed: {
+                total() {
+                    let tmp = 0
+                    this.list.forEach(item => {
+                        tmp += item.num * item.price
+                    });
+                    return tmp
+                }
+            },
+            methods: {
+                delCart(val) {
+                    console.log(val)
+                    //直接使用过滤api，返回过滤后的新数组
+                    let newList = this.list.filter(item => {
+                        return item.id !== val
+                    })
+                    this.list = newList
+                },
+                changeNum(par) {
+                    console.log(par)
+                    if (par.type === 'change') {
+                        this.list.some(item => {
+                            if (item.id === par.id) {
+                                item.num = par.value
+                                return true //返回true时终止遍历
+                            }
+                        })
+                    } else if (par.type === 'add') {
+                        this.list.forEach(item => {
+                            if (item.id === par.id) {
+                                item.num += 2
+                            }
+                        })
+                    } else if (par.type === 'sub') {
+                        this.list.forEach(item => {
+                            if (item.id === par.id) {
+                                item.num -= 1
+                            }
+                        })
+                    }
+                },
+            },
+
+
+        })
+
+        //全局实例用作容器,不使用组件，自己完成购物车功能，对比
+        let vm = new Vue({
+            el: '#app',
+            data: {
+                list: [
+                    { id: 1, name: '苹果手机', num: 2, price: 5000 },
+                    { id: 2, name: '华为手机', num: 2, price: 3000 },
+                    { id: 3, name: '小米手机', num: 2, price: 1000 },
+                    { id: 4, name: '三星手机', num: 2, price: 2000 }
+                ],
+            },
+            computed: {
+                total() {
+                    let tmp = 0
+                    this.list.forEach(item => {
+                        tmp += item.num * item.price
+                    });
+                    return tmp
+                }
+            },
+            methods: {
+                changeNum(par) {
+                    console.log(par)
+                    if (par.type === 'change') {
+                        this.list.some(item => {
+                            if (item.id === par.id) {
+                                item.num = par.value
+                                return true //返回true时终止遍历
+                            }
+                        })
+                    } else if (par.type === 'add') {
+                        this.list.forEach(item => {
+                            if (item.id === par.id) {
+                                item.num += 2
+                            }
+                        })
+                    } else if (par.type === 'sub') {
+                        this.list.forEach(item => {
+                            if (item.id === par.id) {
+                                item.num -= 1
+                            }
+                        })
+                    }
+                },
+                del(id) {
+                    //找到索引，使用splice删除
+                    let index = this.list.findIndex(item => {
+                        return item.id === id
+                    })
+                    this.list.splice(index, 1)
+                }
+            },
+        })
+    </script>
+</body>
+
+</html>
