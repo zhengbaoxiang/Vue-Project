@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>移动端点击触发动画特效</title>
+  <style>
+    /* 基础样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      padding: 20px;
+      background-color: #f5f5f5;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* 网格布局容器 */
+    .animation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    /* 动画元素基础样式 */
+    .animation-item {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      cursor: pointer; /* 移动端点击指针 */
+      position: relative; /* 波纹动画需相对定位 */
+      overflow: hidden; /* 隐藏波纹溢出 */
+    }
+
+    /* 备注样式 */
+    .animation-desc {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* ===================== 点击触发动画定义区 ===================== */
+    /* 1. 点击按压反馈（按钮缩放）：瞬时反馈，模拟物理按钮按压 */
+    @-webkit-keyframes clickPress {
+      0% { -webkit-transform: scale(1); }
+      50% { -webkit-transform: scale(0.95); }
+      100% { -webkit-transform: scale(1); }
+    }
+    @keyframes clickPress {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    .animate-clickPress {
+      -webkit-animation: clickPress 0.3s ease-out forwards;
+      animation: clickPress 0.3s ease-out forwards;
+    }
+
+    /* 2. 点击水波纹效果：移动端按钮核心交互反馈 */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(66, 185, 131, 0.3);
+      transform: scale(0);
+      animation: ripple 0.6s ease-out forwards;
+      pointer-events: none; /* 不遮挡点击 */
+    }
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* 3. 点击切换显隐（淡入淡出）：弹窗/面板切换 */
+    @-webkit-keyframes fadeToggle {
+      from { opacity: 0; -webkit-transform: scale(0.9); }
+      to { opacity: 1; -webkit-transform: scale(1); }
+    }
+    @keyframes fadeToggle {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .toggle-box {
+      margin-top: 10px;
+      width: 80%;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      background: #42b983;
+      color: #fff;
+      border-radius: 4px;
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    .toggle-box.show {
+      -webkit-animation: fadeToggle 0.4s ease-out forwards;
+      animation: fadeToggle 0.4s ease-out forwards;
+    }
+
+    /* 4. 点击旋转切换（开关/图标）：状态切换反馈 */
+    @-webkit-keyframes clickRotate {
+      from { -webkit-transform: rotate(0deg); }
+      to { -webkit-transform: rotate(180deg); }
+    }
+    @keyframes clickRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(180deg); }
+    }
+    .rotate-icon {
+      font-size: 24px;
+      transition: all 0.3s ease;
+    }
+    .rotate-icon.active {
+      -webkit-animation: clickRotate 0.5s ease-out forwards;
+      animation: clickRotate 0.5s ease-out forwards;
+    }
+
+    /* 5. 点击震动提醒（强反馈）：操作失败/重要提示 */
+    @-webkit-keyframes clickShake {
+      0%,100% { -webkit-transform: translateX(0); }
+      20%,60% { -webkit-transform: translateX(-3px); }
+      40%,80% { -webkit-transform: translateX(3px); }
+    }
+    @keyframes clickShake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-3px); }
+      40%,80% { transform: translateX(3px); }
+    }
+    .animate-clickShake {
+      -webkit-animation: clickShake 0.5s ease-in-out forwards;
+      animation: clickShake 0.5s ease-in-out forwards;
+    }
+
+    /* 6. 点击滑动切换（Tab内容）：左右滑动切换 */
+    @-webkit-keyframes slideToggle {
+      from { -webkit-transform: translateX(100%); opacity: 0; }
+      to { -webkit-transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideToggle {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .slide-content {
+      margin-top: 10px;
+      width: 100%;
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      color: #fff;
+      border-radius: 4px;
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    .slide-content.show {
+      -webkit-animation: slideToggle 0.5s ease-out forwards;
+      animation: slideToggle 0.5s ease-out forwards;
+      background: #3498db;
+    }
+  </style>
+</head>
+<body>
+  <div class="animation-grid">
+    <!-- 1. 点击按压反馈：模拟按钮物理按压 -->
+    <div class="animation-item" id="clickPress">
+      <div>🔘 点击按压反馈</div>
+      <div class="animation-desc">clickPress：按钮瞬时缩放，模拟物理按压</div>
+    </div>
+
+    <!-- 2. 点击水波纹效果：移动端按钮核心反馈 -->
+    <div class="animation-item" id="clickRipple">
+      <div>🌊 点击水波纹</div>
+      <div class="animation-desc">ripple：按钮点击水波纹扩散</div>
+    </div>
+
+    <!-- 3. 点击切换显隐：淡入淡出显示/隐藏 -->
+    <div class="animation-item" id="clickFadeToggle">
+      <div>👁️ 点击显示/隐藏</div>
+      <div class="toggle-box" id="toggleBox">已显示（再次点击隐藏）</div>
+      <div class="animation-desc">fadeToggle：弹窗/面板切换显隐</div>
+    </div>
+
+    <!-- 4. 点击旋转切换：图标/开关状态切换 -->
+    <div class="animation-item" id="clickRotate">
+      <div class="rotate-icon" id="rotateIcon">🔽</div>
+      <div class="animation-desc">clickRotate：开关/图标旋转切换</div>
+    </div>
+
+    <!-- 5. 点击震动提醒：操作失败/强反馈 -->
+    <div class="animation-item" id="clickShake">
+      <div>⚠️ 点击震动提醒</div>
+      <div class="animation-desc">clickShake：操作失败/重要提示震动</div>
+    </div>
+
+    <!-- 6. 点击滑动切换：Tab内容左右滑动 -->
+    <div class="animation-item" id="clickSlideToggle">
+      <div>📱 点击滑动切换</div>
+      <div class="slide-content" id="slideContent">Tab内容滑动显示</div>
+      <div class="animation-desc">slideToggle：Tab/列表内容切换</div>
+    </div>
+  </div>
+
+  <script>
+    // 原生JS实现点击触发动画（适配移动端touch事件）
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. 点击按压反馈：添加/移除动画类
+      const clickPress = document.getElementById('clickPress');
+      clickPress.addEventListener('click', () => {
+        // 先移除类名（重置动画），再添加（触发动画）
+        clickPress.classList.remove('animate-clickPress');
+        void clickPress.offsetWidth; // 强制重绘，触发动画重置
+        clickPress.classList.add('animate-clickPress');
+      });
+
+      // 2. 点击水波纹效果：动态创建波纹元素
+      const clickRipple = document.getElementById('clickRipple');
+      clickRipple.addEventListener('click', (e) => {
+        // 获取点击位置（相对于元素）
+        const x = e.clientX - clickRipple.getBoundingClientRect().left;
+        const y = e.clientY - clickRipple.getBoundingClientRect().top;
+        
+        // 创建波纹元素
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        ripple.style.width = ripple.style.height = Math.max(clickRipple.offsetWidth, clickRipple.offsetHeight) + 'px';
+        ripple.style.left = x - (parseInt(ripple.style.width) / 2) + 'px';
+        ripple.style.top = y - (parseInt(ripple.style.height) / 2) + 'px';
+        
+        // 添加并自动移除波纹元素
+        clickRipple.appendChild(ripple);
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      });
+
+      // 3. 点击切换显隐：切换show类名
+      const clickFadeToggle = document.getElementById('clickFadeToggle');
+      const toggleBox = document.getElementById('toggleBox');
+      clickFadeToggle.addEventListener('click', () => {
+        toggleBox.classList.toggle('show');
+        toggleBox.textContent = toggleBox.classList.contains('show') 
+          ? '已显示（再次点击隐藏）' 
+          : '已隐藏（点击显示）';
+      });
+
+      // 4. 点击旋转切换：切换active类名
+      const clickRotate = document.getElementById('clickRotate');
+      const rotateIcon = document.getElementById('rotateIcon');
+      clickRotate.addEventListener('click', () => {
+        rotateIcon.classList.toggle('active');
+        rotateIcon.textContent = rotateIcon.classList.contains('active') ? '🔼' : '🔽';
+      });
+
+      // 5. 点击震动提醒：添加/移除动画类
+      const clickShake = document.getElementById('clickShake');
+      clickShake.addEventListener('click', () => {
+        clickShake.classList.remove('animate-clickShake');
+        void clickShake.offsetWidth;
+        clickShake.classList.add('animate-clickShake');
+      });
+
+      // 6. 点击滑动切换：切换show类名
+      const clickSlideToggle = document.getElementById('clickSlideToggle');
+      const slideContent = document.getElementById('slideContent');
+      clickSlideToggle.addEventListener('click', () => {
+        slideContent.classList.toggle('show');
+        slideContent.textContent = slideContent.classList.contains('show') 
+          ? 'Tab内容滑动显示' 
+          : '';
+      });
+    });
+  </script>
+</body>
+</html>
