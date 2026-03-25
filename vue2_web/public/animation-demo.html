@@ -524,6 +524,93 @@
             /* 鼠标悬停时暂停动画 */
         }
 
+        /* ----------------------------------------------------------------
+         🔥 17. color-shift - 颜色渐变切换动画
+         用途：文字颜色平滑过渡切换效果
+        ---------------------------------------------------------------- */
+        @keyframes m-color-shift {
+            0% {
+                color: #ff6b6b;
+            }
+
+            25% {
+                color: #ffd700;
+            }
+
+            50% {
+                color: #42b983;
+            }
+
+            75% {
+                color: #3498db;
+            }
+
+            100% {
+                color: #ff6b6b;
+            }
+        }
+
+        .m-loop-color-shift {
+            animation: m-color-shift 4s linear infinite;
+        }
+
+        /* ----------------------------------------------------------------
+         🎆 18. text-glow - 霓虹文字发光动画
+         用途：霓虹灯招牌、标题文字发光闪烁效果
+        ---------------------------------------------------------------- */
+        @keyframes m-text-glow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+                opacity: 1;
+            }
+
+            50% {
+                text-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor;
+                opacity: 0.9;
+            }
+        }
+
+        .m-loop-text-glow {
+            color: #ff6b6b;
+            animation: m-text-glow 1.5s ease-in-out infinite;
+        }
+
+        /* ----------------------------------------------------------------
+         ⚡ 20. neon-flicker - 霓虹灯闪烁动画
+         用途：霓虹灯招牌的闪烁效果，有随机断电感
+        ---------------------------------------------------------------- */
+        @keyframes m-neon-flicker {
+
+            0%,
+            19%,
+            21%,
+            23%,
+            25%,
+            54%,
+            56%,
+            100% {
+                text-shadow:
+                    0 0 10px currentColor,
+                    0 0 20px currentColor,
+                    0 0 40px currentColor;
+                opacity: 1;
+            }
+
+            20%,
+            24%,
+            55% {
+                text-shadow: none;
+                opacity: 0.5;
+            }
+        }
+
+        .m-loop-neon {
+            color: #f00997;
+            animation: m-neon-flicker 3s ease-in-out infinite;
+        }
+
         /* ================================================================
            🎯 JS特效类 - 需要JS配合触发，非自动循环
         ================================================================ */
@@ -726,7 +813,7 @@
         <div class="module-grid2" style="margin-top: 20px;">
             <!-- 特效模块 -->
             <div class="module">
-                <div class="module-title">特效</div>
+                <div class="module-title">颜色特效</div>
                 <div class="animation-grid">
                     <div class="animation-item  m-loop-glow">
                         <div class="animation-emoji">✨</div>
@@ -740,6 +827,19 @@
                     <div class="animation-item m-loop-gradient">
                         <div class="animation-emoji">🎨</div>
                         <div class="animation-label text-white">m-gradient</div>
+                    </div>
+                    <div class="animation-item m-loop-color-shift">
+                        <div class="animation-emoji">文字渐变色</div>
+                        <div class="animation-label">m-color-shift</div>
+                    </div>
+                    <div class="animation-item m-loop-text-glow">
+                        <div class="animation-emoji">🎆闪烁</div>
+                        <div class="animation-label">m-text-glow</div>
+                    </div>
+
+                    <div class="animation-item m-loop-neon">
+                        <div class="animation-emoji">⚡闪电</div>
+                        <div class="animation-label">m-neon</div>
                     </div>
                 </div>
             </div>
