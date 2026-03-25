@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-06 10:08:02
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-04 13:36:10
+ * @LastEditTime: 2025-12-01 17:18:30
  * @FilePath: \management\src\main.js
  */
 
@@ -55,6 +55,7 @@ require('@/mock')
 //  1 vue的全局消息推送，单页面内部通信
 window.$Bus = new Vue()
 
+// 仿vue的事件名，手写的事件处理方法,可以避免多次监听，重复触发的问题 to完善
 //  事件中心，原理
 const eventManger = {
     handlers: {},
@@ -86,7 +87,6 @@ const eventManger = {
         }
     }
 }
-// 仿vue的事件名，手写的事件处理方法,可以避免多次监听，重复触发的问题 to完善
 window.$EventBus = {
     $on: function (type, event) {
         eventManger.addHandler(type, event)

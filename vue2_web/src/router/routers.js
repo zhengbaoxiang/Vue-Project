@@ -88,7 +88,7 @@ export default [
                     icon: 'logo-buffer',
                     access: ['admin', 'orderSearch']
                 },
-                component: () => import('@/view/work-order/orderSearch.vue')
+                component: () => import(/* webpackChunkName: "orderSearch" */ '@/view/work-order/orderSearch.vue')
             },
 
         ]
@@ -115,7 +115,7 @@ export default [
                     icon: 'md-person',
                     access: ['admin', 'userList']
                 },
-                component: () => import('@/view/system/userList.vue')
+                component: () => import(/* webpackChunkName: "userList" */ '@/view/system/userList.vue')
             },
             {
                 path: 'roleList',
@@ -151,7 +151,27 @@ export default [
                     access: ['admin']
                 },
                 component: () => import('@/view/template.vue')
-            }
+            },
+            {
+                path: '/virtual-list',
+                name: 'virtual-list',
+                meta: {
+                    title: '虚拟列表',
+                    notCache: true,
+                    access: ['admin']
+                },
+                component: () => import('@/view/virtual-list.vue')
+            },
+            {
+                path: '/scroll-pagination',
+                name: 'scroll-pagination',
+                meta: {
+                    title: '滚动分页加载',
+                    notCache: true,
+                    access: ['admin']
+                },
+                component: () => import('@/view/scroll-pagination.vue')
+            },
         ]
     },
     {

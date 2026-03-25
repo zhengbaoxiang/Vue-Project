@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-07 11:16:03
  * @LastEditors: zbx
- * @LastEditTime: 2025-03-03 19:00:58
+ * @LastEditTime: 2026-03-24 13:38:28
  * @FilePath: \management\src\router\index.js
  */
 import Vue from 'vue'
@@ -33,8 +33,10 @@ router.beforeEach((to, from, next) => {
 
     console.log('--beforeEach->', token, to.name, '<---');
 
-    let debug = false
-    if (debug) {
+    // template 调试模式，直接进入,不需要登陆
+
+    let debug = true;
+    if (debug || to.name == 'template') {
         next() // 跳转
         return
     }

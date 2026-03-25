@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-07 11:16:03
  * @LastEditors: zbx
- * @LastEditTime: 2023-08-21 14:33:40
+ * @LastEditTime: 2025-12-03 19:03:57
  * @FilePath: \management\src\mock\index.js
  */
 import Mock from 'mockjs'
@@ -31,8 +31,8 @@ Mock.setup({
 })
 
 // 登录相关和获取用户信息
-// Mock.mock(/\/sys\/login/, login)
-// Mock.mock(/\/sys\/getUserAuth/, 'get', getUserInfo)
+Mock.mock(/\/sys\/login/, login)
+Mock.mock(/\/sys\/getUserAuth/, 'get', getUserInfo)
 Mock.mock(/\/logout/, logout)
 
 // Mock.mock(/\/sys\/user\/list/, 'post', getUserList)
