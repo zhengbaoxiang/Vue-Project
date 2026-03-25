@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vue3 统一动画特效演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        .page-title {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 18px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            color: #fff;
+            font-size: 16px;
+            margin: 20px 0 10px;
+            padding-left: 10px;
+            border-left: 3px solid #ffd700;
+        }
+
+        .sub-section {
+            color: #fff;
+            font-size: 12px;
+            margin: 8px 0;
+            opacity: 0.85;
+        }
+
+        /* 模块网格 - 每行4个模块 */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 1080px) {
+            .module-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .module-grid {
+                /* 每行2个平分宽度 */
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .module-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .module-grid2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+
+
+        /* 模块容器 */
+        .module {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 16px;
+            height: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .module-title {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* 模块内部动画网格 - 2*2排列 */
+        .animation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            height: calc(100% - 40px);
+            gap: 10px;
+        }
+
+        /* 单项模块（JS特效）占满整行 */
+        .module-full .animation-grid {
+            /*  响应式网格：自动算列数 + 列最小 100px + 铺满容器 */
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        }
+
+        /* 动画项 */
+        .animation-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-height: 70px;
+            border: 1px solid #eaebf0
+        }
+
+        .animation-item:hover {
+            border-color: #e9dede;
+        }
+
+        .animation-emoji {
+            font-size: 40px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .animation-label {
+            font-size: 16px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .text-white {
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+    <style>
+        /* ================================================================
+       🎬 统一动画库 - 按动画类型分组，方便复用时直接复制
+       使用说明：每个动画包含 @keyframes 定义 + 对应的 .m-loop-xxx 循环类
+       复制时只需复制整个动画块即可
+    ================================================================ */
+
+        /* ----------------------------------------------------------------
+         🔄 1. bounce - 弹跳缩放动画
+         用途：心形、篮球等元素的弹跳效果
+        ---------------------------------------------------------------- */
+        @keyframes m-bounce {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            40% {
+                transform: scale(1.15);
+                opacity: 1;
+            }
+
+            60% {
+                transform: scale(0.92);
+                opacity: 0.8;
+            }
+
+            80% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .m-loop-bounce {
+            animation: m-bounce 2s ease-out infinite;
+            animation-delay: 0.2s;
+        }
+
+        /* ----------------------------------------------------------------
+         💓 2. pulse - 脉冲缩放动画
+         用途：心跳、雷达扫描等缩放效果
+        ---------------------------------------------------------------- */
+        @keyframes m-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        .m-loop-pulse {
+            animation: m-pulse 2s ease-in-out infinite;
+            animation-delay: 0.1s;
+        }
+
+        /* ----------------------------------------------------------------
+         🔍 3. zoom - 缩放呼吸动画
+         用途：搜索框放大镜等元素的呼吸效果
+        ---------------------------------------------------------------- */
+        @keyframes m-zoom {
+
+            0%,
+            100% {
+                transform: scale(0.85);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .m-loop-zoom {
+            animation: m-zoom 2s ease-out infinite;
+            animation-delay: 0.5s;
+        }
+
+        /* ----------------------------------------------------------------
+         🌀 4. spin - 360度旋转动画
+         用途：加载图标、刷新按钮等持续旋转效果
+        ---------------------------------------------------------------- */
+        @keyframes m-spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .m-loop-spin {
+            animation: m-spin 2s linear infinite;
+        }
+
+        /* ----------------------------------------------------------------
+         🎒 5. swing - 摆动动画
+         用途：书包、挂件等元素的左右摆动效果，需配合 transform-origin: top center 使用
+        ---------------------------------------------------------------- */
+        @keyframes m-swing {
+
+            0%,
+            100% {
+                transform: rotate(-10deg);
+            }
+
+            50% {
+                transform: rotate(10deg);
+            }
+        }
+
+        .m-loop-swing {
+            animation: m-swing 1s ease-in-out infinite;
+            transform-origin: top center;
+            animation-delay: 0.4s;
+        }
+
+        /* ----------------------------------------------------------------
+         🃏 6. flip - 翻牌/翻转动画
+         用途：扑克牌、卡片翻转等3D翻转效果，需配合 transform-origin: center 使用
+        ---------------------------------------------------------------- */
+        @keyframes m-flip {
+            0% {
+                transform: perspective(400px) rotateY(0deg);
+            }
+
+            100% {
+                transform: perspective(400px) rotateY(180deg);
+            }
+        }
+
+        .m-loop-flip {
+            animation: m-flip 2s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        /* ----------------------------------------------------------------
+         🔽 7. rotate - 90度旋转动画（非360度）
+         用途：箭头、指示器等元素的90度旋转效果
+        ---------------------------------------------------------------- */
+        @keyframes m-rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(-90deg);
+            }
+        }
+
+        .m-loop-rotate {
+            animation: m-rotate 1s ease-out infinite;
+            animation-delay: 0.5s;
+        }
+
+        /* ----------------------------------------------------------------
+         ⬆️ 8. slideV - 垂直滑动+透明度动画
+         用途：上下浮入浮出效果，元素从下往上渐显再渐隐
+        ---------------------------------------------------------------- */
+        @keyframes m-slideV {
+            0% {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+        }
+
+        .m-loop-slideV {
+            animation: m-slideV 2s ease-out infinite;
+            animation-delay: 0.6s;
+        }
+
+        /* ----------------------------------------------------------------
+         ➡️ 9. slideH - 水平滑动+透明度动画
+         用途：左右飘入飘出效果，元素从右往左渐显再渐隐
+        ---------------------------------------------------------------- */
+        @keyframes m-slideH {
+
+            0%,
+            100% {
+                transform: translateX(30px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .m-loop-slideH {
+            animation: m-slideH 2s ease-out infinite;
+            animation-delay: 0.7s;
+        }
+
+        /* ----------------------------------------------------------------
+         💡 11. blink - 闪烁动画
+         用途：灯泡、提示等元素的明暗闪烁效果
+        ---------------------------------------------------------------- */
+        @keyframes m-blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.15;
+            }
+        }
+
+        .m-loop-blink {
+            animation: m-blink 0.8s ease-in-out infinite;
+            animation-delay: 0.9s;
+        }
+
+        /* ----------------------------------------------------------------
+         🔄 12. shake - 抖动动画（位移+旋转）
+         用途：刷新、警告等元素的左右抖动效果
+        ---------------------------------------------------------------- */
+        @keyframes m-shake {
+
+            0%,
+            100% {
+                transform: translateX(0) rotate(0deg);
+            }
+
+            20% {
+                transform: translateX(-5px) rotate(-10deg);
+            }
+
+            40% {
+                transform: translateX(5px) rotate(10deg);
+            }
+
+            60% {
+                transform: translateX(-4px) rotate(-10deg);
+            }
+
+            80% {
+                transform: translateX(4px) rotate(10deg);
+            }
+        }
+
+        .m-loop-shake {
+            animation: m-shake 1s ease-in-out infinite;
+            animation-delay: 0.5s;
+        }
+
+        /* ----------------------------------------------------------------
+         🎈 13. float - 漂浮动画（位移+旋转）
+         用途：气球、热气球等元素的上下漂浮效果
+        ---------------------------------------------------------------- */
+        @keyframes m-float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(10deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(0) rotate(-0deg);
+                opacity: 0.8;
+            }
+        }
+
+        .m-loop-float {
+            animation: m-float 3s linear infinite;
+            animation-delay: 1s;
+        }
+
+        /* ----------------------------------------------------------------
+         ✨ 14. glow - 发光呼吸动画
+         用途：星星、灯泡等元素的金色发光效果
+        ---------------------------------------------------------------- */
+        @keyframes m-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.9), 0 0 35px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        .m-loop-glow {
+            animation: m-glow 2s ease-in-out infinite;
+        }
+
+        /* ----------------------------------------------------------------
+         🌈 15. border-rainbow - 彩虹边框动画
+         用途：彩虹边框效果，四色循环变换（红→黄→绿→蓝）
+        ---------------------------------------------------------------- */
+        @keyframes m-border-rainbow {
+            0% {
+                box-shadow: inset 0 0 0 2px #ff6b6b;
+            }
+
+            25% {
+                box-shadow: inset 0 0 0 2px #ffd700;
+            }
+
+            50% {
+                box-shadow: inset 0 0 0 2px #42b983;
+            }
+
+            75% {
+                box-shadow: inset 0 0 0 2px #3498db;
+            }
+
+            100% {
+                box-shadow: inset 0 0 0 2px #ff6b6b;
+            }
+        }
+
+        .m-loop-border {
+            animation: m-border-rainbow 3s linear infinite;
+        }
+
+        /* ----------------------------------------------------------------
+         🎨 16. gradient - 渐变色动画（需配合 linear-gradient 背景）
+         用途：渐变背景、彩色文字等元素的背景移动效果
+         注意：需同时设置 background + background-size + 动画
+         ---------------------------------------------------------------- */
+        @keyframes m-gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .m-loop-gradient {
+            /* 🎨 渐变色配置，可自定义颜色组合 */
+            background: linear-gradient(30deg, #ff9a9e, #fecfef, #a18cd1, #ff9a9e);
+            /* 备选配色方案：background: linear-gradient(30deg, #ffc3a0, #ffafbd, #ffc3a0); */
+            background-size: 200% 200%;
+            animation: m-gradient 2.5s ease infinite;
+        }
+
+        .m-loop-gradient:hover {
+            animation-play-state: paused;
+            /* 鼠标悬停时暂停动画 */
+        }
+
+        /* ================================================================
+           🎯 JS特效类 - 需要JS配合触发，非自动循环
+        ================================================================ */
+
+        /* ----------------------------------------------------------------
+           🌊 ripple - 水波纹点击特效
+           用途：按钮点击时的水波纹扩散效果
+           使用：JS动态创建span元素添加此类
+        ---------------------------------------------------------------- */
+        @keyframes ripple {
+            to {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        .m-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(66, 126, 234, 0.4);
+            transform: scale(0);
+            pointer-events: none;
+            animation: ripple 3s ease-out forwards;
+        }
+
+        /* ----------------------------------------------------------------
+           ❤️ like - 点赞心形飞出特效
+           用途：社交媒体点赞时心形飞出的效果
+           使用：triggerLike(event) 传入点击事件
+        ---------------------------------------------------------------- */
+        .m-like {
+            position: absolute;
+            font-size: 20px;
+            pointer-events: none;
+            animation: like 1s ease-out forwards;
+        }
+
+        @keyframes like {
+            0% {
+                transform: scale(0) translateY(0);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2) translateY(-30px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.8) translateY(-80px);
+                opacity: 0;
+            }
+        }
+
+        /* ----------------------------------------------------------------
+           ❄️ snow - 雪花飘落特效
+           用途：节日氛围、雪景主题等雪花飘落效果
+           使用：triggerSnow(event, el) 传入事件和容器元素
+        ---------------------------------------------------------------- */
+        .m-snowflake {
+            position: absolute;
+            color: #f00707;
+            font-size: 12px;
+            pointer-events: none;
+            animation: snowfall 2s linear forwards;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(150px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* ----------------------------------------------------------------
+           🎉 confetti / spark / star - 通用放射状粒子特效
+           原理：通过 CSS 自定义变量 --tx, --ty 控制位移方向和距离
+                 元素从点击位置按角度计算坐标，向外放射扩散
+           用途：庆祝彩屑(confetti)、火花(spark)、星星(star)等各种放射效果
+           使用：
+             1. 创建 div 元素并添加 m-confetti 类
+             2. 设置 --tx 和 --ty CSS变量控制位移
+             3. 定位到点击位置
+        ---------------------------------------------------------------- */
+        @keyframes confetti {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .m-confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: confetti 2s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1 class="page-title">✨ Vue3 统一动画特效 ✨</h1>
+
+        <!-- ================================================================
+         🔄 循环播放动画 - 按类型分模块
+    ================================================================ -->
+        <div class="module-grid">
+            <!-- 基础变形模块 -->
+            <div class="module">
+                <div class="module-title">缩放闪烁</div>
+                <div class="animation-grid">
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-pulse">💓</div>
+                        <div class="animation-label">m-pulse</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-bounce">🏀</div>
+                        <div class="animation-label">m-bounce</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-zoom">🔍</div>
+                        <div class="animation-label">m-zoom</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 旋转模块 -->
+            <div class="module">
+                <div class="module-title">旋转</div>
+                <div class="animation-grid">
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-spin">🌀</div>
+                        <div class="animation-label">m-spin</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-swing">🎒</div>
+                        <div class="animation-label">m-swing</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-flip">🃏</div>
+                        <div class="animation-label">m-flip</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-rotate">🔽</div>
+                        <div class="animation-label">m-rotate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 位移+透明度模块 -->
+            <div class="module">
+                <div class="module-title">位移+透明度=浮入飞出</div>
+                <div class="animation-grid">
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-slideV">⬆️</div>
+                        <div class="animation-label">m-slideV</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-slideH">➡️</div>
+                        <div class="animation-label">m-slideH</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-blink">💡</div>
+                        <div class="animation-label">m-blink</div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 抖动模块 -->
+            <div class="module">
+                <div class="module-title">位移+旋转</div>
+                <div class="animation-grid">
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-shake">🔄</div>
+                        <div class="animation-label">m-shake</div>
+                    </div>
+                    <div class="animation-item">
+                        <div class="animation-emoji m-loop-float">🎈</div>
+                        <div class="animation-label">m-float</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-grid2" style="margin-top: 20px;">
+            <!-- 特效模块 -->
+            <div class="module">
+                <div class="module-title">特效</div>
+                <div class="animation-grid">
+                    <div class="animation-item  m-loop-glow">
+                        <div class="animation-emoji">✨</div>
+                        <div class="animation-label">m-glow</div>
+                    </div>
+
+                    <div class="animation-item m-loop-border">
+                        <div class="animation-emoji">🌈</div>
+                        <div class="animation-label">m-border</div>
+                    </div>
+                    <div class="animation-item m-loop-gradient">
+                        <div class="animation-emoji">🎨</div>
+                        <div class="animation-label text-white">m-gradient</div>
+                    </div>
+                </div>
+            </div>
+            <!--  JS特效模块 - 单独占满一行 -->
+            <div class="module module-full">
+                <div class="module-title">🎯 JS特效 (点击触发)</div>
+                <div class="animation-grid">
+                    <div class="animation-item" @click="triggerConfetti($event)">
+                        <div class="animation-emoji">🎉</div>
+                        <div class="animation-label">m-confetti</div>
+                    </div>
+                    <div class="animation-item" @click="triggerRipple($event)">
+                        <div class="animation-emoji">🌊</div>
+                        <div class="animation-label">m-ripple</div>
+                    </div>
+                    <div class="animation-item" @click="triggerLike($event)">
+                        <div class="animation-emoji">❤️</div>
+                        <div class="animation-label">m-like</div>
+                    </div>
+                    <div class="animation-item" @click="triggerSnow($event)">
+                        <div class="animation-emoji">❄️</div>
+                        <div class="animation-label">m-snow</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.staticfile.org/vue/3.4.21/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            setup() {
+
+                // 放射彩屑特效（点击触发）
+                const triggerConfetti = (e) => {
+                    // 1. 获取事件绑定的目标元素
+                    const el = e.currentTarget
+                    // 2. 获取元素相对于视口的位置信息（缓存起来，避免重复调用）
+                    const rect = el.getBoundingClientRect()
+                    // 3. 彩屑颜色数组
+                    const colors = ['#ff6b6b', '#ffd700', '#42b983', '#3498db', '#9b59b6', '#ff9a9e']
+                    // 4. 循环生成 12 个彩屑元素
+                    for (let i = 0; i < 12; i++) {
+                        const span = document.createElement('div')
+                        span.className = 'm-confetti'
+                        // 5. 循环取色（不重复、不越界）
+                        span.style.background = colors[i % colors.length]
+                        // 6. 核心：计算每个彩屑的放射角度（360°均分12份）
+                        const angle = (i / 12) * Math.PI * 2
+                        // 7. 随机放射距离（50~90px 之间随机）
+                        const dist = 60 + Math.random() * 40
+                        // 8. 设置CSS自定义变量，控制位移
+                        span.style.setProperty('--tx', Math.cos(angle) * dist + 'px')
+                        span.style.setProperty('--ty', Math.sin(angle) * dist + 'px')
+                        // 9. 彩屑初始定位：鼠标点击的位置（元素内部坐标）
+                        span.style.left = (e.clientX - rect.left) + 'px'
+                        span.style.top = (e.clientY - rect.top) + 'px'
+                        // 10. 添加到页面
+                        el.appendChild(span)
+                        // 11. 800毫秒后删除彩屑元素
+                        setTimeout(() => span.remove(), 2000)
+                    }
+                }
+
+                // 涟漪特效
+                const triggerRipple = (e) => {
+                    const el = e.currentTarget
+                    const rect = el.getBoundingClientRect()
+                    const span = document.createElement('span')
+                    span.className = 'm-ripple'
+                    // 元素尺寸属性 取最大值，确保涟漪覆盖整个元素区域
+                    const size = Math.max(el.offsetWidth, el.offsetHeight)
+                    //  一次性批量设置元素的行内样式（等价于多次写 span.style.xxx）
+                    //  鼠标视口坐标clientX - 元素视口坐标 = 鼠标在元素内部的坐标
+                    // - 尺寸/2 = 让水波纹的中心对准鼠标点击位置（否则水波纹左上角会对准鼠标）
+                    span.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`
+                    el.appendChild(span)
+                    setTimeout(() => span.remove(), 6 * 1000)
+                }
+
+                /* ----------------------------------------------------------------
+                   ❤️ 点赞心形飞出特效
+                   生成一个心形emoji，从点击位置向上飞起并消失
+                ---------------------------------------------------------------- */
+                const triggerLike = (e) => {
+                    const el = e.currentTarget
+                    const rect = el.getBoundingClientRect()
+                    const hearts = ['❤️', '💖', '💗', '💕']
+                    for (let i = 0; i < 3; i++) {
+                        const span = document.createElement('span')
+                        span.className = 'm-like'
+                        span.textContent = hearts[i % hearts.length]
+                        // 随机水平偏移，让心形稍微散开
+                        const offsetX = (Math.random() - 0.5) * 40
+                        span.style.left = (e.clientX - rect.left + offsetX) + 'px'
+                        span.style.top = (e.clientY - rect.top) + 'px'
+                        el.appendChild(span)
+                        setTimeout(() => span.remove(), 1000)
+                    }
+                }
+
+                /* ----------------------------------------------------------------
+                   ❄️ 雪花飘落特效
+                   在点击位置生成多个雪花，向下飘落并消失
+                ---------------------------------------------------------------- */
+                const triggerSnow = (e) => {
+                    const el = e.currentTarget
+                    const rect = el.getBoundingClientRect()
+                    const snowflakes = ['❄', '❅', '❆', '✦', '✧']
+                    for (let i = 0; i < 15; i++) {
+                        const span = document.createElement('span')
+                        span.className = 'm-snowflake'
+                        span.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)]
+                        // 随机水平位置和大小
+                        span.style.left = (Math.random() * el.offsetWidth) + 'px'
+                        span.style.top = (e.clientY - rect.top) + 'px'
+                        span.style.fontSize = (8 + Math.random() * 10) + 'px'
+                        // 随机下落时间
+                        span.style.animationDuration = (1.5 + Math.random() * 1) + 's'
+                        el.appendChild(span)
+                        setTimeout(() => span.remove(), 2000)
+                    }
+                }
+
+                return { triggerRipple, triggerConfetti, triggerLike, triggerSnow }
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
