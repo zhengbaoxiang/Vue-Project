@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排序算法可视化演示 - Vue3版本</title>
+    <!-- 引入外部资源 -->
+    <script src="https://cdn.staticfile.org/vue/3.4.21/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        neutral: '#64748b',
+                        comparing: '#f97316',
+                        sorted: '#10b981',
+                        swapping: '#ef4444',
+                        background: '#f8fafc',
+                        card: '#ffffff',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        code: ['Fira Code', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                },
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .transition-height {
+                transition-property: height;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                transition-duration: 300ms;
+            }
+            .bar-shadow {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            .stat-card {
+                @apply bg-card rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+            }
+            .control-btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2;
+            }
+            .control-btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90 active:bg-primary/80;
+            }
+            .control-btn-secondary {
+                @apply bg-gray-100 text-gray-800 hover:bg-gray-200 active:bg-gray-300;
+            }
+            .collapsible-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+            }
+            .collapsible-content.open {
+                max-height: 2000px;
+                transition: max-height 0.5s ease-in;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-background text-gray-800 min-h-screen flex flex-col">
+    <div id="app" class="flex-grow">
+        <!-- 顶部导航栏 -->
+        <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300">
+            <div class="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa fa-exchange text-primary text-2xl"></i>
+                    <h1 class="text-[clamp(1.25rem,3vw,1.75rem)] font-bold text-gray-800">排序算法可视化</h1>
+                </div>
+                <nav class="hidden md:flex items-center gap-6 mt-4 md:mt-0">
+                    <a href="#visualization" class="text-gray-600 hover:text-primary transition-colors">可视化</a>
+                    <a href="#code" class="text-gray-600 hover:text-primary transition-colors">代码实现</a>
+                    <a href="#explanation" class="text-gray-600 hover:text-primary transition-colors">算法说明</a>
+                </nav>
+                <button class="md:hidden text-gray-600 hover:text-primary" @click="mobileMenuOpen = !mobileMenuOpen">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+            <!-- 移动端菜单 -->
+            <div v-if="mobileMenuOpen" class="md:hidden bg-white border-t">
+                <div class="container mx-auto px-4 py-3 flex flex-col gap-3">
+                    <a href="#visualization" class="text-gray-600 hover:text-primary py-2 transition-colors" @click="mobileMenuOpen = false">可视化</a>
+                    <a href="#code" class="text-gray-600 hover:text-primary py-2 transition-colors" @click="mobileMenuOpen = false">代码实现</a>
+                    <a href="#explanation" class="text-gray-600 hover:text-primary py-2 transition-colors" @click="mobileMenuOpen = false">算法说明</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <!-- 算法选择器区域 -->
+            <section class="mb-6">
+                <div class="bg-card rounded-xl shadow-md p-5 border border-gray-100">
+                    <h2 class="text-lg font-semibold mb-4">选择排序算法</h2>
+                    <div class="flex flex-wrap gap-3">
+                        <button 
+                            v-for="algorithm in algorithms" 
+                            :key="algorithm.value"
+                            :class="['px-4 py-2 rounded-lg font-medium transition-all duration-200', 
+                                    currentAlgorithm === algorithm.value ? 'bg-primary text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200']"
+                            @click="currentAlgorithm = algorithm.value; onAlgorithmChange()"
+                        >{{ algorithm.name }}</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 算法原理和Python实现区域 - 可折叠 -->
+            <section class="mb-6">
+                <div class="bg-card rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <!-- 折叠按钮 -->
+                    <button 
+                        class="w-full px-5 py-4 flex items-center justify-between text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+                        @click="isCodeSectionOpen = !isCodeSectionOpen"
+                    >
+                        <div class="flex items-center gap-2">
+                            <i class="fa fa-info-circle text-primary"></i>
+                            <h2 class="text-lg font-semibold">算法原理与Python实现</h2>
+                        </div>
+                        <i :class="['fa transition-transform duration-300', isCodeSectionOpen ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
+                    </button>
+                    
+                    <!-- 可折叠内容 -->
+                    <div :class="['collapsible-content', isCodeSectionOpen ? 'open' : '']">
+                        <div class="p-5">
+                            <!-- 算法原理 -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-medium mb-3 text-primary">算法原理</h3>
+                                <p class="mb-4 text-gray-700 leading-relaxed">
+                                    {{ currentAlgorithmInfo.description }}
+                                </p>
+                            </div>
+                            
+                            <!-- Python代码实现 -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-medium mb-3 text-primary">Python实现</h3>
+                                
+                                <div class="code-content">
+                                    <div class="code-block font-code text-sm md:text-base" v-show="currentAlgorithm === 'bubble'">
+<pre class="bg-gray-50 p-4 rounded-lg overflow-x-auto"><code>def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n - 1):
+        # 最后i个元素已经就位
+        for j in range(0, n - i - 1):
+            # 从0到n-i-1遍历
+            if arr[j] > arr[j + 1]:
+                # 交换元素
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+    return arr</code></pre>
+                                    </div>
+                                    
+                                    <div class="code-block font-code text-sm md:text-base" v-show="currentAlgorithm === 'selection'">
+<pre class="bg-gray-50 p-4 rounded-lg overflow-x-auto"><code>def selection_sort(arr):
+    n = len(arr)
+    # 一个一个地将未排序部分的最小元素放到已排序部分的末尾
+    for i in range(n - 1):
+        # 找到未排序部分中的最小元素
+        min_idx = i
+        for j in range(i + 1, n):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+        
+        # 将找到的最小元素与未排序部分的第一个元素交换
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr</code></pre>
+                                    </div>
+                                    
+                                    <div class="code-block font-code text-sm md:text-base" v-show="currentAlgorithm === 'insertion'">
+<pre class="bg-gray-50 p-4 rounded-lg overflow-x-auto"><code>def insertion_sort(arr):
+    n = len(arr)
+    for i in range(1, n):
+        key = arr[i]
+        j = i - 1
+        
+        # 将arr[0..i-1]中大于key的元素向后移动一位
+        while j >= 0 and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+    return arr</code></pre>
+                                    </div>
+                                    
+                                    <div class="code-block font-code text-sm md:text-base" v-show="currentAlgorithm === 'quick'">
+<pre class="bg-gray-50 p-4 rounded-lg overflow-x-auto"><code>def quick_sort(arr, low=0, high=None):
+    if high is None:
+        high = len(arr) - 1
+    
+    if low < high:
+        # pi是分区点，arr[pi]现在位于正确的位置
+        pi = partition(arr, low, high)
+        
+        # 分别对分区点左右两部分进行排序
+        quick_sort(arr, low, pi - 1)
+        quick_sort(arr, pi + 1, high)
+    
+    return arr
+
+def partition(arr, low, high):
+    # 选择最右边的元素作为枢轴
+    pivot = arr[high]
+    i = low - 1  # 小于枢轴的元素的索引
+    
+    for j in range(low, high):
+        # 如果当前元素小于或等于枢轴
+        if arr[j] <= pivot:
+            i += 1
+            # 交换arr[i]和arr[j]
+            arr[i], arr[j] = arr[j], arr[i]
+    
+    # 交换arr[i+1]和arr[high]（或枢轴）
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    
+    return i + 1</code></pre>
+                                    </div>
+                                    
+                                    <div class="code-block font-code text-sm md:text-base" v-show="currentAlgorithm === 'merge'">
+<pre class="bg-gray-50 p-4 rounded-lg overflow-x-auto"><code>def merge_sort(arr, l=0, r=None):
+    if r is None:
+        r = len(arr) - 1
+    
+    if l < r:
+        # 找到中间点
+        m = l + (r - l) // 2
+        
+        # 对两半分别排序
+        merge_sort(arr, l, m)
+        merge_sort(arr, m + 1, r)
+        
+        # 合并已排序的两半
+        merge(arr, l, m, r)
+    
+    return arr
+
+def merge(arr, l, m, r):
+    n1 = m - l + 1
+    n2 = r - m
+    
+    # 创建临时数组
+    L = [0] * n1
+    R = [0] * n2
+    
+    # 复制数据到临时数组L[]和R[]
+    for i in range(n1):
+        L[i] = arr[l + i]
+    for j in range(n2):
+        R[j] = arr[m + 1 + j]
+    
+    # 合并临时数组
+    i = 0  # 初始索引L[]
+    j = 0  # 初始索引R[]
+    k = l  # 初始索引合并后的子数组
+    
+    while i < n1 and j < n2:
+        if L[i] <= R[j]:
+            arr[k] = L[i]
+            i += 1
+        else:
+            arr[k] = R[j]
+            j += 1
+        k += 1
+    
+    # 复制L[]的剩余元素
+    while i < n1:
+        arr[k] = L[i]
+        i += 1
+        k += 1
+    
+    # 复制R[]的剩余元素
+    while j < n2:
+        arr[k] = R[j]
+        j += 1
+        k += 1</code></pre>
+                                    </div>
+                                    
+                                    <div class="code-block font-code text-sm md:text-base" v-show="currentAlgorithm === 'heap'">
+<pre class="bg-gray-50 p-4 rounded-lg overflow-x-auto"><code>def heap_sort(arr):
+    n = len(arr)
+    
+    # 构建最大堆
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(arr, n, i)
+    
+    # 一个个从堆顶取出元素
+    for i in range(n - 1, 0, -1):
+        # 将当前堆顶（最大值）移到数组末尾
+        arr[i], arr[0] = arr[0], arr[i]
+        
+        # 对剩余的堆进行堆化
+        heapify(arr, i, 0)
+    
+    return arr
+
+# 堆化以root为根的子树，n是堆的大小
+def heapify(arr, n, root):
+    largest = root  # 初始化最大值为根
+    left = 2 * root + 1  # 左子节点 = 2*root + 1
+    right = 2 * root + 2  # 右子节点 = 2*root + 2
+    
+    # 如果左子节点大于根
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+    
+    # 如果右子节点大于到目前为止的最大值
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+    
+    # 如果最大值不是根
+    if largest != root:
+        arr[root], arr[largest] = arr[largest], arr[root]
+        
+        # 递归地堆化受影响的子树
+        heapify(arr, n, largest)</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 适用场景 -->
+                            <div>
+                                <h3 class="text-lg font-medium mb-3 text-primary">适用场景</h3>
+                                <p class="mb-3 text-gray-700">
+                                    {{ currentAlgorithmInfo.usageScenarios }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 控制按钮区域 -->
+            <section class="mb-6">
+                <div class="bg-card rounded-xl shadow-md p-5 border border-gray-100">
+                    <div class="flex flex-wrap gap-4">
+                        <button id="new-array" class="control-btn control-btn-secondary" @click="createNewArray">
+                            <i class="fa fa-refresh"></i> 新建数组
+                        </button>
+                        <button id="start-sort" class="control-btn control-btn-primary" @click="startSort" :disabled="isSorting && !isPaused">
+                            <i class="fa fa-play"></i> 开始
+                        </button>
+                        <button id="pause-sort" class="control-btn control-btn-secondary" @click="togglePause" :disabled="!isSorting">
+                            <i :class="isPaused ? 'fa fa-play' : 'fa fa-pause'"></i> {{ isPaused ? '继续' : '暂停' }}
+                        </button>
+                        <button id="reset-sort" class="control-btn control-btn-secondary" @click="resetSort">
+                            <i class="fa fa-stop"></i> 重置
+                        </button>
+                        
+                        <!-- 数组大小滑块 -->
+                        <div class="flex-grow flex items-center gap-4">
+                            <label for="array-size" class="text-sm font-medium text-gray-700 whitespace-nowrap">数组大小: <span id="array-size-value">{{ arraySize }}</span></label>
+                            <input 
+                                type="range" 
+                                id="array-size" 
+                                min="5" 
+                                max="50" 
+                                v-model.number="arraySize" 
+                                class="flex-grow h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                @input="onArraySizeChange"
+                            >
+                        </div>
+                        
+                        <!-- 排序速度滑块 -->
+                        <div class="flex-grow flex items-center gap-4">
+                            <label for="sort-speed" class="text-sm font-medium text-gray-700 whitespace-nowrap">排序速度: <span id="sort-speed-value">{{ sortSpeed }}</span>ms</label>
+                            <input 
+                                type="range" 
+                                id="sort-speed" 
+                                min="10" 
+                                max="500" 
+                                v-model.number="sortSpeed" 
+                                class="flex-grow h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                @input="onSortSpeedChange"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 可视化区域 -->
+            <section id="visualization" class="mb-12">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- 左侧统计信息 -->
+                    <div class="lg:col-span-1 space-y-4">
+                        <h2 class="text-lg font-semibold mb-2">统计信息</h2>
+                        <div class="stat-card">
+                            <div class="text-gray-500 text-sm mb-1">比较次数</div>
+                            <div class="text-2xl font-bold text-primary" id="comparison-count">{{ comparisonCount }}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-gray-500 text-sm mb-1">交换次数</div>
+                            <div class="text-2xl font-bold text-swapping" id="swap-count">{{ swapCount }}</div>
+                        </div>
+                        
+                        <!-- 算法信息展示 -->
+                        <div class="bg-card rounded-xl shadow-md p-4 border border-gray-100 mt-6">
+                            <h3 class="font-medium mb-3">算法信息</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="text-sm text-gray-500">最佳时间复杂度</div>
+                                    <div class="font-medium" id="best-time-complexity">{{ currentAlgorithmInfo.bestTimeComplexity }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500">平均时间复杂度</div>
+                                    <div class="font-medium" id="average-time-complexity">{{ currentAlgorithmInfo.averageTimeComplexity }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500">最坏时间复杂度</div>
+                                    <div class="font-medium" id="worst-time-complexity">{{ currentAlgorithmInfo.worstTimeComplexity }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500">空间复杂度</div>
+                                    <div class="font-medium" id="space-complexity">{{ currentAlgorithmInfo.spaceComplexity }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500">稳定性</div>
+                                    <div class="font-medium" id="stability">{{ currentAlgorithmInfo.stability }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧可视化区域 -->
+                    <div class="lg:col-span-3">
+                        <div class="bg-card rounded-xl shadow-md p-5 border border-gray-100 h-full">
+                            <h2 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-100">排序过程可视化</h2>
+                            <div class="flex items-end justify-center gap-[2px] md:gap-[4px] h-[400px] w-full p-2 md:p-4 overflow-x-auto" id="visualization-container">
+                                <div 
+                                    v-for="(value, index) in array" 
+                                    :key="index"
+                                    class="relative flex flex-col items-center"
+                                    :style="{ width: `${elementWidth}px` }"
+                                >
+                                    <div 
+                                        :class="getBarClass(index)"
+                                        :style="getBarStyle(value, index)"
+                                    ></div>
+                                    <div class="text-xs mt-1 text-gray-600 font-medium">{{ value }}</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-4 mt-4 justify-center text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-neutral rounded-sm"></div>
+                                    <span>未排序</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-comparing rounded-sm"></div>
+                                    <span>比较中</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-swapping rounded-sm"></div>
+                                    <span>交换中</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-sorted rounded-sm"></div>
+                                    <span>已排序</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 算法复杂度对比区域 -->
+            <section id="explanation" class="mb-12">
+                <div class="bg-card rounded-xl shadow-md p-5 border border-gray-100">
+                    <h2 class="text-xl font-semibold mb-6">排序算法复杂度对比</h2>
+                    
+                    <!-- 复杂度对比表格 -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="border border-gray-200 px-4 py-2 text-left">排序算法</th>
+                                    <th class="border border-gray-200 px-4 py-2 text-left">最佳时间复杂度</th>
+                                    <th class="border border-gray-200 px-4 py-2 text-left">平均时间复杂度</th>
+                                    <th class="border border-gray-200 px-4 py-2 text-left">最坏时间复杂度</th>
+                                    <th class="border border-gray-200 px-4 py-2 text-left">空间复杂度</th>
+                                    <th class="border border-gray-200 px-4 py-2 text-left">稳定性</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(algo, index) in algorithms" :key="index" class="hover:bg-gray-50 transition-colors">
+                                    <td class="border border-gray-200 px-4 py-2 font-medium">{{ algo.name }}</td>
+                                    <td class="border border-gray-200 px-4 py-2">{{ algo.bestTimeComplexity }}</td>
+                                    <td class="border border-gray-200 px-4 py-2">{{ algo.averageTimeComplexity }}</td>
+                                    <td class="border border-gray-200 px-4 py-2">{{ algo.worstTimeComplexity }}</td>
+                                    <td class="border border-gray-200 px-4 py-2">{{ algo.spaceComplexity }}</td>
+                                    <td class="border border-gray-200 px-4 py-2">{{ algo.stability }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 复杂度分析 -->
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium mb-3 text-primary">复杂度分析</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-medium mb-2">时间复杂度</h4>
+                                <p class="text-gray-700 mb-2">时间复杂度表示算法执行所需的时间与输入规模的关系。</p>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                    <li><span class="font-semibold">O(n)</span> - 线性时间复杂度，如冒泡排序在最好情况下</li>
+                                    <li><span class="font-semibold">O(n log n)</span> - 线性对数时间复杂度，如快速排序、归并排序、堆排序</li>
+                                    <li><span class="font-semibold">O(n²)</span> - 平方时间复杂度，如冒泡排序、选择排序、插入排序</li>
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-medium mb-2">空间复杂度</h4>
+                                <p class="text-gray-700 mb-2">空间复杂度表示算法执行所需的额外空间与输入规模的关系。</p>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                    <li><span class="font-semibold">O(1)</span> - 常数空间复杂度，如冒泡排序、选择排序、插入排序、堆排序</li>
+                                    <li><span class="font-semibold">O(log n)</span> - 对数空间复杂度，如快速排序</li>
+                                    <li><span class="font-semibold">O(n)</span> - 线性空间复杂度，如归并排序</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bg-white border-t border-gray-200 py-6">
+            <div class="container mx-auto px-4 text-center text-gray-600 text-sm">
+                <p>排序算法可视化演示 &copy; 2023</p>
+                <p class="mt-1">一个直观展示排序算法工作原理的交互式工具</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 排序算法生成器
+        const sortingAlgorithms = {
+            // 冒泡排序算法生成器
+            bubble: function* (arr) {
+                const n = arr.length;
+                for (let i = 0; i < n - 1; i++) {
+                    for (let j = 0; j < n - i - 1; j++) {
+                        // 比较相邻元素
+                        yield { type: 'compare', indices: [j, j + 1] };
+                        
+                        if (arr[j] > arr[j + 1]) {
+                            // 交换元素
+                            yield { type: 'swap', indices: [j, j + 1] };
+                            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                        }
+                    }
+                    // 标记当前i位置的元素为已排序
+                    yield { type: 'sorted', indices: [n - 1 - i] };
+                }
+                // 标记最后一个元素为已排序
+                yield { type: 'sorted', indices: [0] };
+            },
+            
+            // 选择排序算法生成器
+            selection: function* (arr) {
+                const n = arr.length;
+                for (let i = 0; i < n - 1; i++) {
+                    let minIdx = i;
+                    yield { type: 'highlight', indices: [minIdx] };
+                    
+                    for (let j = i + 1; j < n; j++) {
+                        yield { type: 'compare', indices: [minIdx, j] };
+                        
+                        if (arr[j] < arr[minIdx]) {
+                            minIdx = j;
+                            yield { type: 'highlight', indices: [minIdx] };
+                        }
+                    }
+                    
+                    if (minIdx !== i) {
+                        yield { type: 'swap', indices: [i, minIdx] };
+                        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                    }
+                    
+                    yield { type: 'sorted', indices: [i] };
+                }
+                // 标记最后一个元素为已排序
+                yield { type: 'sorted', indices: [n - 1] };
+            },
+            
+            // 插入排序算法生成器
+            insertion: function* (arr) {
+                const n = arr.length;
+                yield { type: 'sorted', indices: [0] };
+                
+                for (let i = 1; i < n; i++) {
+                    const key = arr[i];
+                    let j = i - 1;
+                    
+                    yield { type: 'highlight', indices: [i] };
+                    
+                    while (j >= 0 && arr[j] > key) {
+                        yield { type: 'compare', indices: [j, j + 1] };
+                        yield { type: 'swap', indices: [j, j + 1] };
+                        
+                        arr[j + 1] = arr[j];
+                        j--;
+                    }
+                    
+                    arr[j + 1] = key;
+                    
+                    // 标记前i+1个元素为已排序
+                    const sorted = Array.from({length: i + 1}, (_, k) => k);
+                    yield { type: 'sorted', indices: sorted };
+                }
+            },
+            
+            // 快速排序算法生成器
+            quick: function* (arr) {
+                // 辅助函数：快速排序
+                const quickSort = function* (arr, low, high) {
+                    if (low < high) {
+                        const pivotIndex = yield* partition(arr, low, high);
+                        
+                        yield { type: 'sorted', indices: [pivotIndex] };
+                        
+                        yield* quickSort(arr, low, pivotIndex - 1);
+                        yield* quickSort(arr, pivotIndex + 1, high);
+                    } else if (low === high) {
+                        yield { type: 'sorted', indices: [low] };
+                    }
+                };
+                
+                // 辅助函数：分区
+                const partition = function* (arr, low, high) {
+                    const pivot = arr[high];
+                    yield { type: 'highlight', indices: [high] };
+                    
+                    let i = low - 1;
+                    
+                    for (let j = low; j < high; j++) {
+                        yield { type: 'compare', indices: [j, high] };
+                        
+                        if (arr[j] <= pivot) {
+                            i++;
+                            if (i !== j) {
+                                yield { type: 'swap', indices: [i, j] };
+                                [arr[i], arr[j]] = [arr[j], arr[i]];
+                            }
+                        }
+                    }
+                    
+                    if (i + 1 !== high) {
+                        yield { type: 'swap', indices: [i + 1, high] };
+                        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+                    }
+                    
+                    return i + 1;
+                };
+                
+                // 开始快速排序
+                yield* quickSort(arr, 0, arr.length - 1);
+            },
+            
+            // 归并排序算法生成器
+            merge: function* (arr) {
+                // 辅助函数：归并排序
+                const mergeSort = function* (arr, start, end) {
+                    if (start < end) {
+                        const mid = Math.floor((start + end) / 2);
+                        
+                        yield { type: 'highlight', indices: [mid, mid + 1] };
+                        
+                        yield* mergeSort(arr, start, mid);
+                        yield* mergeSort(arr, mid + 1, end);
+                        
+                        yield* mergeArrays(arr, start, mid, end);
+                    } else {
+                        yield { type: 'sorted', indices: [start] };
+                    }
+                };
+                
+                // 辅助函数：合并
+                const mergeArrays = function* (arr, start, mid, end) {
+                    const left = arr.slice(start, mid + 1);
+                    const right = arr.slice(mid + 1, end + 1);
+                    
+                    let i = 0, j = 0, k = start;
+                    
+                    while (i < left.length && j < right.length) {
+                        yield { type: 'compare', indices: [start + i, mid + 1 + j] };
+                        
+                        if (left[i] <= right[j]) {
+                            arr[k] = left[i];
+                            i++;
+                        } else {
+                            arr[k] = right[j];
+                            j++;
+                        }
+                        
+                        yield { type: 'highlight', indices: [k] };
+                        k++;
+                    }
+                    
+                    while (i < left.length) {
+                        arr[k] = left[i];
+                        yield { type: 'highlight', indices: [k] };
+                        i++;
+                        k++;
+                    }
+                    
+                    while (j < right.length) {
+                        arr[k] = right[j];
+                        yield { type: 'highlight', indices: [k] };
+                        j++;
+                        k++;
+                    }
+                    
+                    // 标记合并后的子数组为已排序
+                    const sorted = Array.from({length: end - start + 1}, (_, idx) => start + idx);
+                    yield { type: 'sorted', indices: sorted };
+                };
+                
+                // 开始归并排序
+                yield* mergeSort(arr, 0, arr.length - 1);
+            },
+            
+            // 堆排序算法生成器
+            heap: function* (arr) {
+                // 辅助函数：堆化
+                const heapify = function* (arr, n, i) {
+                    let largest = i;
+                    const left = 2 * i + 1;
+                    const right = 2 * i + 2;
+                    
+                    yield { type: 'highlight', indices: [largest] };
+                    
+                    if (left < n) {
+                        yield { type: 'compare', indices: [largest, left] };
+                        
+                        if (arr[left] > arr[largest]) {
+                            largest = left;
+                            yield { type: 'highlight', indices: [largest] };
+                        }
+                    }
+                    
+                    if (right < n) {
+                        yield { type: 'compare', indices: [largest, right] };
+                        
+                        if (arr[right] > arr[largest]) {
+                            largest = right;
+                            yield { type: 'highlight', indices: [largest] };
+                        }
+                    }
+                    
+                    if (largest !== i) {
+                        yield { type: 'swap', indices: [i, largest] };
+                        [arr[i], arr[largest]] = [arr[largest], arr[i]];
+                        
+                        yield* heapify(arr, n, largest);
+                    }
+                };
+                
+                const n = arr.length;
+                
+                // 构建最大堆
+                for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+                    yield* heapify(arr, n, i);
+                }
+                
+                // 一个个从堆顶取出元素
+                for (let i = n - 1; i > 0; i--) {
+                    yield { type: 'swap', indices: [0, i] };
+                    [arr[0], arr[i]] = [arr[i], arr[0]];
+                    
+                    yield { type: 'sorted', indices: [i] };
+                    
+                    yield* heapify(arr, i, 0);
+                }
+                
+                // 标记最后一个元素为已排序
+                yield { type: 'sorted', indices: [0] };
+            }
+        };
+
+        // 创建Vue应用
+        const { createApp, ref, computed, onMounted, watch } = Vue;
+
+        createApp({
+            setup() {
+                // 响应式数据
+                const mobileMenuOpen = ref(false);
+                const array = ref([]);
+                const originalArray = ref([]); // 存储原始数组用于重置
+                const arraySize = ref(20);
+                const sortSpeed = ref(100); // 毫秒
+                const isSorting = ref(false);
+                const isPaused = ref(false);
+                const comparisonCount = ref(0);
+                const swapCount = ref(0);
+                const animationId = ref(null);
+                const currentAlgorithm = ref('bubble');
+                const algorithmIterator = ref(null);
+                const sortedIndices = ref([]);
+                const highlightIndices = ref([]);
+                const elementWidth = ref(20);
+                const isCodeSectionOpen = ref(false); // 控制代码区域折叠状态
+                
+                // 算法信息
+                const algorithms = [
+                    {
+                        value: 'bubble',
+                        name: '冒泡排序',
+                        bestTimeComplexity: 'O(n)',
+                        averageTimeComplexity: 'O(n²)',
+                        worstTimeComplexity: 'O(n²)',
+                        spaceComplexity: 'O(1)',
+                        stability: '稳定',
+                        description: '冒泡排序是一种简单的排序算法。它重复地走访过要排序的数列，一次比较两个相邻的元素，如果它们的顺序错误就把它们交换过来。走访数列的工作是重复地进行直到没有再需要交换，也就是说该数列已经排序完成。',
+                        spaceDescription: '原地排序算法，不需要额外的存储空间',
+                        usageScenarios: '对于几乎已经排序的数据，优化版的冒泡排序性能良好；数据量很小的情况，简单性比效率更重要时；教学场景，用于解释排序算法的基本原理；需要稳定排序且实现简单的场景。'
+                    },
+                    {
+                        value: 'selection',
+                        name: '选择排序',
+                        bestTimeComplexity: 'O(n²)',
+                        averageTimeComplexity: 'O(n²)',
+                        worstTimeComplexity: 'O(n²)',
+                        spaceComplexity: 'O(1)',
+                        stability: '不稳定',
+                        description: '选择排序是一种简单直观的排序算法。它的工作原理是每次从待排序的数据元素中选出最小（或最大）的一个元素，放到已排序序列的末尾，直到全部待排序的数据元素排完。',
+                        spaceDescription: '原地排序算法，不需要额外的存储空间',
+                        usageScenarios: '当内存空间有限时；当需要最小化写入操作次数时；对于小型数据集；教学目的。'
+                    },
+                    {
+                        value: 'insertion',
+                        name: '插入排序',
+                        bestTimeComplexity: 'O(n)',
+                        averageTimeComplexity: 'O(n²)',
+                        worstTimeComplexity: 'O(n²)',
+                        spaceComplexity: 'O(1)',
+                        stability: '稳定',
+                        description: '插入排序是一种简单直观的排序算法。它的工作原理是通过构建有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。',
+                        spaceDescription: '原地排序算法，不需要额外的存储空间',
+                        usageScenarios: '对于几乎已经排序的数据，插入排序性能接近线性；对于小型数据集；当数据是实时到达且需要保持有序时；嵌入式系统或内存受限环境。'
+                    },
+                    {
+                        value: 'quick',
+                        name: '快速排序',
+                        bestTimeComplexity: 'O(n log n)',
+                        averageTimeComplexity: 'O(n log n)',
+                        worstTimeComplexity: 'O(n²)',
+                        spaceComplexity: 'O(log n)',
+                        stability: '不稳定',
+                        description: '快速排序是一种分而治之的算法。它选择一个元素作为枢轴，然后将数组分为两部分：小于枢轴的元素和大于枢轴的元素。然后递归地对这两部分进行排序。',
+                        spaceDescription: '递归调用栈所需的空间，平均情况下为O(log n)',
+                        usageScenarios: '大多数情况下的首选排序算法；对于大型数据集；需要平均情况下的高性能；不需要稳定性的场景。'
+                    },
+                    {
+                        value: 'merge',
+                        name: '归并排序',
+                        bestTimeComplexity: 'O(n log n)',
+                        averageTimeComplexity: 'O(n log n)',
+                        worstTimeComplexity: 'O(n log n)',
+                        spaceComplexity: 'O(n)',
+                        stability: '稳定',
+                        description: '归并排序是建立在归并操作上的一种有效的排序算法。该算法是采用分治法的一个非常典型的应用。首先递归地将数组分成两半分别排序，然后将结果归并起来。',
+                        spaceDescription: '需要额外的O(n)空间来存储临时数组',
+                        usageScenarios: '需要保证最坏情况下的O(n log n)性能；需要稳定排序；对于大型数据集；外部排序（数据太大无法完全放入内存）。'
+                    },
+                    {
+                        value: 'heap',
+                        name: '堆排序',
+                        bestTimeComplexity: 'O(n log n)',
+                        averageTimeComplexity: 'O(n log n)',
+                        worstTimeComplexity: 'O(n log n)',
+                        spaceComplexity: 'O(1)',
+                        stability: '不稳定',
+                        description: '堆排序是一种基于比较的排序算法。它利用堆这种数据结构所设计的一种排序算法。堆是一个近似完全二叉树的结构，并同时满足堆积的性质：即子结点的键值或索引总是小于（或者大于）它的父节点。',
+                        spaceDescription: '原地排序算法，不需要额外的存储空间',
+                        usageScenarios: '需要保证最坏情况下的O(n log n)性能；内存空间有限；需要找出数组中最大或最小的k个元素；优先队列的实现。'
+                    }
+                ];
+                
+                // 计算属性
+                const currentAlgorithmInfo = computed(() => {
+                    return algorithms.find(algo => algo.value === currentAlgorithm.value) || algorithms[0];
+                });
+                
+                // 方法
+                const createNewArray = () => {
+                    console.log('创建新数组，大小为:', arraySize.value);
+                    resetSort();
+                    array.value = [];
+                    for (let i = 0; i < arraySize.value; i++) {
+                        // 生成1到100的随机数
+                        array.value.push(Math.floor(Math.random() * 100) + 1);
+                    }
+                    // 保存原始数组的深拷贝
+                    originalArray.value = [...array.value];
+                    updateElementWidth();
+                    console.log('新数组创建完成:', array.value);
+                    console.log('原始数组保存完成:', originalArray.value);
+                };
+                
+                const updateElementWidth = () => {
+                    // 简化计算，确保元素宽度始终有值
+                    elementWidth.value = Math.max(10, 1000 / arraySize.value);
+                    console.log('元素宽度更新为:', elementWidth.value);
+                };
+                
+                const getBarClass = (index) => {
+                    if (sortedIndices.value.includes(index)) {
+                        return 'bg-sorted';
+                    } else if (highlightIndices.value.includes(index)) {
+                        // 如果是两个高亮元素且正在比较
+                        if (highlightIndices.value.length === 2 && highlightIndices.value[0] === index && array.value[index] > array.value[highlightIndices.value[1]]) {
+                            return 'bg-swapping';
+                        } else {
+                            return 'bg-comparing';
+                        }
+                    } else {
+                        return 'bg-neutral';
+                    }
+                };
+                
+                const getBarStyle = (value, index) => {
+                    const container = document.getElementById('visualization-container');
+                    const maxHeight = container ? container.clientHeight * 0.9 : 360;
+                    const height = (value / 100) * maxHeight;
+                    
+                    // 默认使用柱状样式
+                    return {
+                        height: `${height}px`,
+                        width: '100%',
+                        borderRadius: '4px 4px 0 0',
+                        // transition: 'all 200ms ease-out',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    };
+                };
+                
+                const startSort = () => {
+                    console.log('开始排序，算法:', currentAlgorithm.value);
+                    if (isSorting.value && isPaused.value) {
+                        // 继续排序
+                        isPaused.value = false;
+                        continueSorting();
+                    } else if (!isSorting.value) {
+                        // 开始新的排序
+                        isSorting.value = true;
+                        isPaused.value = false;
+                        comparisonCount.value = 0;
+                        swapCount.value = 0;
+                        sortedIndices.value = [];
+                        highlightIndices.value = [];
+                        
+                        // 获取当前选择的算法生成器
+                        const generator = sortingAlgorithms[currentAlgorithm.value];
+                        if (!generator) {
+                            console.error('未找到算法生成器:', currentAlgorithm.value);
+                            return;
+                        }
+                        
+                        // 直接传递原数组的引用，这样生成器可以修改原数组
+                        algorithmIterator.value = generator(array.value);
+                        
+                        // 开始排序
+                        continueSorting();
+                    }
+                };
+                
+                const togglePause = () => {
+                    if (isSorting.value) {
+                        if (isPaused.value) {
+                            // 继续排序
+                            console.log('继续排序');
+                            isPaused.value = false;
+                            continueSorting();
+                        } else {
+                            // 暂停排序
+                            console.log('暂停排序');
+                            isPaused.value = true;
+                            if (animationId.value) {
+                                clearTimeout(animationId.value);
+                                animationId.value = null;
+                            }
+                        }
+                    }
+                };
+                
+                const continueSorting = () => {
+                    if (isSorting.value && !isPaused.value) {
+                        // 执行下一步排序
+                        const result = algorithmIterator.value.next();
+                        
+                        if (!result.done) {
+                            const step = result.value;
+                            
+                            // 更新统计信息
+                            if (step.type === 'compare') {
+                                comparisonCount.value++;
+                                console.log('比较次数:', comparisonCount.value);
+                            }
+                            if (step.type === 'swap') {
+                                swapCount.value++;
+                                console.log('交换次数:', swapCount.value);
+                            }
+                            
+                            // 更新已排序索引
+                            if (step.type === 'sorted') {
+                                // 将新的已排序索引添加到数组中
+                                step.indices.forEach(idx => {
+                                    if (!sortedIndices.value.includes(idx)) {
+                                        sortedIndices.value.push(idx);
+                                    }
+                                });
+                            }
+                            
+                            // 更新高亮索引
+                            highlightIndices.value = step.indices;
+                            
+                            // 继续下一步
+                            animationId.value = setTimeout(continueSorting, sortSpeed.value);
+                        } else {
+                            // 排序完成
+                            console.log('排序完成');
+                            highlightIndices.value = [];
+                            sortedIndices.value = Array.from({length: array.value.length}, (_, k) => k);
+                            isSorting.value = false;
+                            console.log('最终排序结果:', array.value);
+                        }
+                    }
+                };
+                
+                const resetSort = () => {
+                    console.log('重置排序');
+                    if (isSorting.value) {
+                        isSorting.value = false;
+                        isPaused.value = false;
+                        if (animationId.value) {
+                            clearTimeout(animationId.value);
+                            animationId.value = null;
+                        }
+                    }
+                    
+                    // 重置计数器和已排序索引
+                    comparisonCount.value = 0;
+                    swapCount.value = 0;
+                    sortedIndices.value = [];
+                    highlightIndices.value = [];
+                    
+                    // 从原始数组恢复
+                    if (originalArray.value.length > 0) {
+                        array.value = [...originalArray.value];
+                        console.log('数组已重置为原始状态:', array.value);
+                    }
+                };
+                
+                const onAlgorithmChange = () => {
+                    console.log('算法变更为:', currentAlgorithm.value);
+                    resetSort();
+                };
+                
+                const onArraySizeChange = () => {
+                    console.log('数组大小改变为:', arraySize.value);
+                    if (!isSorting.value) {
+                        createNewArray();
+                    }
+                };
+                
+                const onSortSpeedChange = () => {
+                    console.log('排序速度改变为:', sortSpeed.value);
+                    // 速度改变时不需要特殊处理，会在下次动画时生效
+                };
+                
+                // 生命周期钩子
+                onMounted(() => {
+                    console.log('页面加载完成，初始化数组');
+                    // 确保在页面加载时初始化数组和元素宽度
+                    updateElementWidth();
+                    createNewArray();
+                    window.addEventListener('resize', updateElementWidth);
+                });
+                
+                // 监听数组大小变化
+                watch(arraySize, (newSize) => {
+                    if (!isSorting.value) {
+                        createNewArray();
+                    }
+                });
+                
+                return {
+                    // 响应式数据
+                    mobileMenuOpen,
+                    array,
+                    originalArray,
+                    arraySize,
+                    sortSpeed,
+                    isSorting,
+                    isPaused,
+                    comparisonCount,
+                    swapCount,
+                    currentAlgorithm,
+                    sortedIndices,
+                    highlightIndices,
+                    elementWidth,
+                    algorithms,
+                    currentAlgorithmInfo,
+                    isCodeSectionOpen,
+                    
+                    // 方法
+                    createNewArray,
+                    startSort,
+                    togglePause,
+                    resetSort,
+                    onAlgorithmChange,
+                    onArraySizeChange,
+                    onSortSpeedChange,
+                    getBarClass,
+                    getBarStyle
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

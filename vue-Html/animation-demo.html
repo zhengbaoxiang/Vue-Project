@@ -528,6 +528,30 @@
         }
 
         /* ----------------------------------------------------------------
+         🌈 19. color-text - 彩虹彩色文字动画
+         用途：每个汉字颜色不同的彩虹文字效果
+         原理：使用 linear-gradient 背景 + background-clip: text 让文字显示渐变
+        ---------------------------------------------------------------- */
+        @keyframes m-color-text {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .m-loop-color-text {
+            background: linear-gradient(90deg, #ff6b6b, #ffd700, #42b983, #3498db, #9b59b6, #ff6b6b);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: m-color-text 3s linear infinite;
+        }
+
+        /* ----------------------------------------------------------------
          🔥 17. color-shift - 颜色渐变切换动画
          用途：文字颜色平滑过渡切换效果
         ---------------------------------------------------------------- */
@@ -554,7 +578,7 @@
         }
 
         .m-loop-color-shift {
-            animation: m-color-shift 4s linear infinite;
+            animation: m-color-shift 2s linear infinite;
         }
 
         /* ----------------------------------------------------------------
@@ -580,39 +604,7 @@
             animation: m-text-glow 1.5s ease-in-out infinite;
         }
 
-        /* ----------------------------------------------------------------
-         ⚡ 20. neon-flicker - 霓虹灯闪烁动画
-         用途：霓虹灯招牌的闪烁效果，有随机断电感
-        ---------------------------------------------------------------- */
-        @keyframes m-neon-flicker {
 
-            0%,
-            19%,
-            21%,
-            23%,
-            25%,
-            54%,
-            56%,
-            100% {
-                text-shadow:
-                    0 0 10px currentColor,
-                    0 0 20px currentColor,
-                    0 0 40px currentColor;
-                opacity: 1;
-            }
-
-            20%,
-            24%,
-            55% {
-                text-shadow: none;
-                opacity: 0.5;
-            }
-        }
-
-        .m-loop-neon {
-            color: #f00997;
-            animation: m-neon-flicker 3s ease-in-out infinite;
-        }
 
         /* ================================================================
            🎯 JS特效类 - 需要JS配合触发，非自动循环
@@ -718,11 +710,11 @@
 
         .m-confetti {
             position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+            width: 6px;
+            height: 6px;
+            /* border-radius: 50%; */
             pointer-events: none;
-            animation: confetti 2s ease-out forwards;
+            animation: confetti 1s ease-out forwards;
         }
     </style>
 </head>
@@ -831,6 +823,10 @@
                         <div class="animation-emoji">🎨</div>
                         <div class="animation-label text-white">m-gradient</div>
                     </div>
+                    <div class="animation-item m-loop-color-text">
+                        <div class="animation-emoji">彩色文字</div>
+                        <div class="animation-label">m-color-text</div>
+                    </div>
                     <div class="animation-item m-loop-color-shift">
                         <div class="animation-emoji">文字渐变色</div>
                         <div class="animation-label">m-color-shift</div>
@@ -840,10 +836,7 @@
                         <div class="animation-label">m-text-glow</div>
                     </div>
 
-                    <div class="animation-item m-loop-neon">
-                        <div class="animation-emoji">⚡闪电</div>
-                        <div class="animation-label">m-neon</div>
-                    </div>
+
                 </div>
             </div>
             <!--  JS特效模块 - 单独占满一行 -->
