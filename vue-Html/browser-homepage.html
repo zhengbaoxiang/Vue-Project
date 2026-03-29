@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的浏览器主页</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.staticfile.org/vue/3.4.21/vue.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      overflow-x: hidden;
+      transition: background-image 0.8s ease-in-out;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      z-index: -1;
+    }
+
+    #app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== Header ========== */
+    .header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 30px;
+    }
+
+    .header-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 18px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
+    }
+
+    .header-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* ========== Search Section ========== */
+    .search-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 20px 40px;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ai-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .ai-tag {
+      padding: 8px 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+    }
+
+    .ai-tag:hover {
+      background: rgba(99, 102, 241, 0.3);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .ai-tag {
+      text-decoration: none;
+    }
+
+    .search-box {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 16px 50px 16px 24px;
+      background: var(--glass-bg);
+      border: 2px solid transparent;
+      border-radius: 16px;
+      color: var(--text-primary);
+      font-size: 16px;
+      backdrop-filter: blur(15px);
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), 0 8px 32px rgba(99, 102, 241, 0.15);
+    }
+
+    .search-btn {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    /* ========== Main Content ========== */
+    .main-content {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 30px;
+      padding: 20px 30px 40px;
+      height: 45vh;
+      min-height: 300px;
+    }
+
+    .site-column {
+      width: 35%;
+      min-width: 280px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(15px);
+      animation: fadeInUp 0.8s ease-out backwards;
+      max-height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .site-column:nth-child(1) { animation-delay: 0.2s; }
+    .site-column:nth-child(2) { animation-delay: 0.4s; }
+
+    /* Center decoration */
+    .center-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 100px;
+    }
+
+    .center-glow {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.4), transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .column-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .column-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .column-title .icon {
+      font-size: 22px;
+    }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .add-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    /* ========== Cards Grid ========== */
+    .cards-grid {
+      display: grid;
+      gap: 12px;
+      overflow:visible;
+      flex: 1;
+      padding-right: 4px;
+    }
+
+    .site-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: cardEnter 0.5s ease-out backwards;
+      overflow: visible;
+    }
+
+    @keyframes cardEnter {
+      from { opacity: 0; transform: scale(0.8) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .site-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--primary);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
+    }
+
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+      transition: transform 0.3s ease;
+    }
+
+    .site-card:hover .card-icon {
+      transform: scale(1.15);
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: center;
+      word-break: break-word;
+    }
+
+    .card-actions {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.2s ease;
+      z-index: 100;
+    }
+
+    .site-card:hover .card-actions {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .card-action-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30, 30, 50, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-action-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    .card-action-btn.delete:hover {
+      background: #ef4444;
+      border-color: #ef4444;
+    }
+
+    /* Drag states */
+    .site-card.dragging {
+      opacity: 0.4;
+      transform: scale(0.9);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .site-card.drag-over-top {
+      border-color: var(--primary);
+      border-top: 3px solid var(--primary);
+      box-shadow: 0 -4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .site-card.drag-over-bottom {
+      border-color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .cards-grid.drag-over {
+      outline: 2px dashed rgba(99, 102, 241, 0.4);
+      outline-offset: 4px;
+    }
+
+    /* ========== Modal ========== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      width: 90%;
+      max-width: 420px;
+      background: linear-gradient(145deg, rgba(30, 30, 50, 0.95), rgba(20, 20, 35, 0.95));
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 30px;
+      animation: modalEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes modalEnter {
+      from { opacity: 0; transform: scale(0.9) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .form-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fca5a5;
+      font-size: 13px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .confirm-modal {
+      max-width: 360px;
+    }
+
+    .confirm-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+    }
+
+    .btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* ========== Settings Panel ========== */
+    .settings-panel {
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .settings-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .layout-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .layout-option {
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .layout-option:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .layout-option.active {
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      border-color: transparent;
+    }
+
+    .bg-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .bg-option {
+      aspect-ratio: 16/10;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .bg-option:hover {
+      transform: scale(1.05);
+    }
+
+    .bg-option.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+    }
+
+    .bg-upload {
+      margin-top: 12px;
+    }
+
+    .bg-upload-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .bg-upload-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--primary);
+      color: var(--text-primary);
+    }
+
+    .bg-upload-input {
+      display: none;
+    }
+
+    /* ========== Empty State ========== */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 1200px) {
+      .main-content {
+        flex-wrap: wrap;
+        height: auto;
+        min-height: auto;
+      }
+
+      .site-column {
+        width: calc(50% - 15px);
+      }
+
+      .center-area {
+        display: none;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .main-content {
+        flex-direction: column;
+        padding: 15px 20px 30px;
+      }
+
+      .site-column {
+        width: 100%;
+        max-height: none;
+      }
+
+      .header {
+        padding: 15px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .ai-tags {
+        gap: 6px;
+      }
+
+      .ai-tag {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .search-input {
+        padding: 14px 20px 14px 18px;
+        font-size: 15px;
+      }
+    }
+
+    /* ========== Animations ========== */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
+    }
+
+    .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+    .animate-float { animation: float 3s ease-in-out infinite; }
+    .animate-glow { animation: glow 2s ease-in-out infinite; }
+
+    /* ========== Scrollbar ========== */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <button class="header-btn" @click="showSettings = true" title="设置">
+        ⚙️
+      </button>
+      <button class="header-btn" @click="switchBackground" title="换背景">
+        🖼️
+      </button>
+    </header>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <div class="ai-tags">
+        <a
+          v-for="link in aiLinks"
+          :key="link.name"
+          class="ai-tag"
+          :href="link.url"
+          target="_blank"
+        >
+          {{ link.icon }} {{ link.name }}
+        </a>
+      </div>
+      <div class="search-box">
+        <input
+          type="text"
+          class="search-input"
+          v-model="searchQuery"
+          placeholder="百度搜索..."
+          @keyup.enter="doSearch"
+        >
+        <button class="search-btn" @click="doSearch">🔍</button>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Learning Column -->
+      <div class="site-column">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="icon">📚</span>
+            <span>学习网站</span>
+          </div>
+          <button class="add-btn" @click="openAddModal('learning')" title="新增">
+            +
+          </button>
+        </div>
+        <div class="cards-grid" :style="gridStyle"
+          :class="{ 'drag-over': dragType === 'learning' && isDraggingOver === 'learning' }"
+          @dragover.prevent="onDragOver($event, 'learning')"
+          @dragleave="onDragLeave($event, 'learning')"
+          @drop="onDrop($event, 'learning')"
+        >
+          <template v-if="learningSites.length > 0">
+            <div
+              v-for="(site, index) in learningSites"
+              :key="site.id"
+              class="site-card"
+              :class="{
+                'dragging': dragIndex === index && dragType === 'learning',
+                'drag-over-top': dragOverIndex === index && dragType === 'learning' && dragPlace === 'before',
+                'drag-over-bottom': dragOverIndex === index && dragType === 'learning' && dragPlace === 'after'
+              }"
+              :style="{ animationDelay: (index * 0.05) + 's' }"
+              draggable="true"
+              @dragstart="onDragStart($event, site, index, 'learning')"
+              @dragend="onDragEnd"
+              @dragenter="onDragEnter($event, index, 'learning')"
+              @click="openUrl(site.url)"
+            >
+              <div class="card-content">
+                <span class="card-icon">{{ site.icon }}</span>
+                <span class="card-title">{{ site.title }}</span>
+              </div>
+              <div class="card-actions">
+                <button class="card-action-btn" @click.stop="openEditModal('learning', site)" title="编辑">✏️</button>
+                <button class="card-action-btn delete" @click.stop="deleteSite('learning', site.id)" title="删除">🗑️</button>
+              </div>
+            </div>
+          </template>
+          <div v-else class="empty-state">
+            <div class="icon">📖</div>
+            <p>暂无学习网站，点击"+"添加</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center decoration -->
+      <div class="center-area">
+        <div class="center-glow"></div>
+      </div>
+
+      <!-- Entertainment Column -->
+      <div class="site-column">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="icon">🎮</span>
+            <span>娱乐网站</span>
+          </div>
+          <button class="add-btn" @click="openAddModal('entertainment')" title="新增">
+            +
+          </button>
+        </div>
+        <div class="cards-grid" :style="gridStyle"
+          :class="{ 'drag-over': dragType === 'entertainment' && isDraggingOver === 'entertainment' }"
+          @dragover.prevent="onDragOver($event, 'entertainment')"
+          @dragleave="onDragLeave($event, 'entertainment')"
+          @drop="onDrop($event, 'entertainment')"
+        >
+          <template v-if="entertainmentSites.length > 0">
+            <div
+              v-for="(site, index) in entertainmentSites"
+              :key="site.id"
+              class="site-card"
+              :class="{
+                'dragging': dragIndex === index && dragType === 'entertainment',
+                'drag-over-top': dragOverIndex === index && dragType === 'entertainment' && dragPlace === 'before',
+                'drag-over-bottom': dragOverIndex === index && dragType === 'entertainment' && dragPlace === 'after'
+              }"
+              :style="{ animationDelay: (index * 0.05) + 's' }"
+              draggable="true"
+              @dragstart="onDragStart($event, site, index, 'entertainment')"
+              @dragend="onDragEnd"
+              @dragenter="onDragEnter($event, index, 'entertainment')"
+              @click="openUrl(site.url)"
+            >
+              <div class="card-content">
+                <span class="card-icon">{{ site.icon }}</span>
+                <span class="card-title">{{ site.title }}</span>
+              </div>
+              <div class="card-actions">
+                <button class="card-action-btn" @click.stop="openEditModal('entertainment', site)" title="编辑">✏️</button>
+                <button class="card-action-btn delete" @click.stop="deleteSite('entertainment', site.id)" title="删除">🗑️</button>
+              </div>
+            </div>
+          </template>
+          <div v-else class="empty-state">
+            <div class="icon">🎬</div>
+            <p>暂无娱乐网站，点击"+"添加</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Edit/Add Modal -->
+    <div class="modal-overlay" v-if="showEditModal" @click.self="closeModal">
+      <div class="modal">
+        <h3 class="modal-title">{{ editingSite ? '编辑网站' : '新增网站' }}</h3>
+        <div class="form-error" v-if="formError">{{ formError }}</div>
+        <div class="form-group">
+          <label class="form-label">网站名称</label>
+          <input
+            type="text"
+            class="form-input"
+            v-model="editForm.title"
+            placeholder="例如：GitHub"
+            @input="formError = ''"
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label">网站地址</label>
+          <input
+            type="url"
+            class="form-input"
+            v-model="editForm.url"
+            placeholder="例如：https://github.com"
+            @input="formError = ''"
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label">图标 (emoji)</label>
+          <input
+            type="text"
+            class="form-input"
+            v-model="editForm.icon"
+            placeholder="例如：🐙"
+            maxlength="2"
+          >
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-cancel" @click="closeModal">取消</button>
+          <button class="btn btn-primary" @click="saveSite">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div class="modal-overlay" v-if="showConfirm" @click.self="cancelDelete">
+      <div class="modal confirm-modal">
+        <h3 class="modal-title">确认删除</h3>
+        <p class="confirm-text">确定要删除「{{ confirmTarget?.title }}」吗？</p>
+        <div class="form-actions">
+          <button class="btn btn-cancel" @click="cancelDelete">取消</button>
+          <button class="btn btn-danger" @click="confirmDelete">删除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" v-if="showSettings" @click.self="showSettings = false">
+      <div class="modal settings-panel">
+        <h3 class="modal-title">⚙️ 设置</h3>
+
+        <div class="settings-section">
+          <div class="settings-label">卡片布局</div>
+          <div class="layout-options">
+            <span
+              v-for="opt in layoutOptions"
+              :key="opt.label"
+              class="layout-option"
+              :class="{ active: layout.rows === opt.rows && layout.cols === opt.cols }"
+              @click="setLayout(opt.rows, opt.cols)"
+            >
+              {{ opt.rows }}行 × {{ opt.cols }}列
+            </span>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label">背景图片</div>
+          <div class="bg-options">
+            <div
+              v-for="(bg, index) in backgrounds"
+              :key="index"
+              class="bg-option"
+              :class="{ active: currentBgIndex === index && !customBg }"
+              :style="{ backgroundImage: 'url(' + bg + ')' }"
+              @click="setBackground(index)"
+            ></div>
+          </div>
+          <div class="bg-upload">
+            <label class="bg-upload-btn">
+              📁 选择本地图片
+              <input type="file" class="bg-upload-input" accept="image/*" @change="handleBgUpload">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" @click="showSettings = false" style="flex: 1">完成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue
+
+    createApp({
+      setup() {
+        // Search
+        const searchQuery = ref('')
+        const aiLinks = [
+          { name: '豆包', icon: '🫛', url: 'https://www.doubao.com' },
+          { name: '千问', icon: '🐴', url: 'https://tongyi.aliyun.com/qianwen' },
+          { name: 'DeepSeek', icon: '🔮', url: 'https://www.deepseek.com' },
+        ]
+
+        const doSearch = () => {
+          if (!searchQuery.value.trim()) return
+          window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(searchQuery.value), '_blank')
+        }
+
+        const openUrl = (url) => {
+          window.open(url, '_blank')
+        }
+
+        // Drag and Drop
+        const dragSite = ref(null)
+        const dragIndex = ref(-1)
+        const dragType = ref('')
+        const dragOverIndex = ref(-1)
+        const dragPlace = ref('before') // 'before' or 'after'
+        const isDraggingOver = ref('')
+
+        const onDragStart = (event, site, index, type) => {
+          dragSite.value = site
+          dragIndex.value = index
+          dragType.value = type
+          event.dataTransfer.effectAllowed = 'move'
+          event.dataTransfer.setData('text/plain', site.id.toString())
+        }
+
+        const onDragEnd = () => {
+          dragSite.value = null
+          dragIndex.value = -1
+          dragType.value = ''
+          dragOverIndex.value = -1
+          dragPlace.value = 'before'
+          isDraggingOver.value = ''
+        }
+
+        const onDragEnter = (event, index, type) => {
+          if (type !== dragType.value) return
+          event.preventDefault()
+
+          const cards = event.currentTarget.parentElement.querySelectorAll('.site-card')
+          const card = cards[index]
+          if (!card) return
+
+          const box = card.getBoundingClientRect()
+          const offset = event.clientY - box.top
+
+          if (offset < box.height / 2) {
+            dragPlace.value = 'before'
+            dragOverIndex.value = index
+          } else {
+            if (dragOverIndex.value === index && dragPlace.value === 'before') {
+              // 保持不变
+            } else {
+              dragPlace.value = 'after'
+              dragOverIndex.value = index
+            }
+          }
+        }
+
+        const onDragOver = (event, type) => {
+          if (type !== dragType.value) return
+          event.preventDefault()
+          event.dataTransfer.dropEffect = 'move'
+          isDraggingOver.value = type
+
+          const cardsGrid = event.currentTarget
+          const cards = Array.from(cardsGrid.querySelectorAll('.site-card')).filter(
+            (card, i) => !(dragType.value === type && dragIndex.value === i)
+          )
+
+          if (cards.length === 0) {
+            dragOverIndex.value = -1
+            return
+          }
+
+          let closestIndex = -1
+          let closestPlace = 'before'
+          let closestDistance = Infinity
+
+          cards.forEach((card) => {
+            const box = card.getBoundingClientRect()
+            const cardCenter = box.top + box.height / 2
+            const distance = Math.abs(event.clientY - cardCenter)
+
+            const isAbove = event.clientY < cardCenter
+
+            if (distance < closestDistance) {
+              closestDistance = distance
+              if (isAbove) {
+                closestIndex = Array.from(cards).indexOf(card)
+                closestPlace = 'before'
+              } else {
+                closestIndex = Array.from(cards).indexOf(card)
+                closestPlace = 'after'
+              }
+            }
+          })
+
+          if (event.clientY < cards[0].getBoundingClientRect().top) {
+            closestIndex = 0
+            closestPlace = 'before'
+          }
+
+          const lastCard = cards[cards.length - 1]
+          if (event.clientY > lastCard.getBoundingClientRect().bottom) {
+            closestIndex = Array.from(cards).indexOf(lastCard)
+            closestPlace = 'after'
+          }
+
+          dragOverIndex.value = closestIndex
+          dragPlace.value = closestPlace
+        }
+
+        const onDragLeave = (event, type) => {
+          if (type !== dragType.value) return
+
+          const relatedTarget = event.relatedTarget
+          if (!event.currentTarget.contains(relatedTarget)) {
+            isDraggingOver.value = ''
+          }
+        }
+
+        const onDrop = (event, type) => {
+          if (type !== dragType.value) return
+          event.preventDefault()
+
+          const list = type === 'learning' ? learningSites : entertainmentSites
+
+          if (dragIndex.value === -1 || dragOverIndex.value === -1) {
+            onDragEnd()
+            return
+          }
+
+          let insertIndex = dragOverIndex.value
+          if (dragPlace.value === 'after') {
+            insertIndex = dragOverIndex.value + 1
+          }
+
+          if (dragIndex.value !== insertIndex) {
+            const draggedSite = list.value[dragIndex.value]
+            list.value.splice(dragIndex.value, 1)
+
+            if (dragIndex.value < insertIndex) {
+              insertIndex--
+            }
+
+            list.value.splice(insertIndex, 0, draggedSite)
+            saveToStorage()
+          }
+
+          onDragEnd()
+        }
+
+        // Layout
+        const layout = ref({ rows: 3, cols: 4 })
+        const layoutOptions = [
+          { rows: 2, cols: 3, label: '2x3' },
+          { rows: 3, cols: 4, label: '3x4' },
+          { rows: 4, cols: 5, label: '4x5' },
+          { rows: 5, cols: 6, label: '5x6' }
+        ]
+
+        const gridStyle = computed(() => ({
+          gridTemplateColumns: `repeat(${layout.value.cols}, 1fr)`
+        }))
+
+        const setLayout = (rows, cols) => {
+          layout.value = { rows, cols }
+          localStorage.setItem('homepage_layout', JSON.stringify({ rows, cols }))
+        }
+
+        // Backgrounds
+        const backgrounds = ref([
+          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920',
+          'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920',
+          'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=1920',
+          'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920',
+          'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920',
+          'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920',
+          'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=1920',
+          'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1920'
+        ])
+        const currentBgIndex = ref(0)
+        const customBg = ref(false)
+
+        const setBackground = (index) => {
+          currentBgIndex.value = index
+          customBg.value = false
+          document.body.style.backgroundImage = `url(${backgrounds.value[index]})`
+          localStorage.setItem('homepage_bg', index)
+          localStorage.removeItem('homepage_custom_bg')
+        }
+
+        const handleBgUpload = (event) => {
+          const file = event.target.files[0]
+          if (!file) return
+
+          const reader = new FileReader()
+          reader.onload = (e) => {
+            const dataUrl = e.target.result
+            document.body.style.backgroundImage = `url(${dataUrl})`
+            currentBgIndex.value = -1
+            customBg.value = true
+            localStorage.setItem('homepage_bg', -1)
+            localStorage.setItem('homepage_custom_bg', dataUrl)
+          }
+          reader.readAsDataURL(file)
+        }
+
+        const switchBackground = () => {
+          const next = (currentBgIndex.value + 1) % backgrounds.value.length
+          setBackground(next)
+          customBg.value = false
+        }
+
+        // Sites Data
+        const learningSites = ref([
+          { id: 1, title: 'GitHub', url: 'https://github.com', icon: '🐙' },
+          { id: 2, title: 'MDN', url: 'https://developer.mozilla.org', icon: '📚' },
+          { id: 3, title: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '💬' },
+          { id: 4, title: 'Vue.js', url: 'https://vuejs.org', icon: '💚' },
+          { id: 5, title: 'React', url: 'https://react.dev', icon: '⚛️' },
+          { id: 6, title: 'LeetCode', url: 'https://leetcode.cn', icon: '🎯' }
+        ])
+
+        const entertainmentSites = ref([
+          { id: 1, title: '哔哩哔哩', url: 'https://www.bilibili.com', icon: '📺' },
+          { id: 2, title: 'YouTube', url: 'https://www.youtube.com', icon: '▶️' },
+          { id: 3, title: '微博', url: 'https://weibo.com', icon: '📱' },
+          { id: 4, title: '抖音', url: 'https://www.douyin.com', icon: '🎵' },
+          { id: 5, title: '知乎', url: 'https://www.zhihu.com', icon: '❓' },
+          { id: 6, title: '网易云音乐', url: 'https://music.163.com', icon: '🎧' }
+        ])
+
+        // Modal State
+        const showEditModal = ref(false)
+        const showSettings = ref(false)
+        const editingSite = ref(null)
+        const editingType = ref('')
+        const editForm = ref({ title: '', url: '', icon: '🌐' })
+
+        const openAddModal = (type) => {
+          editingType.value = type
+          editingSite.value = null
+          editForm.value = { title: '', url: '', icon: '🌐' }
+          showEditModal.value = true
+        }
+
+        const openEditModal = (type, site) => {
+          editingType.value = type
+          editingSite.value = site
+          editForm.value = { ...site }
+          showEditModal.value = true
+        }
+
+        const closeModal = () => {
+          showEditModal.value = false
+          editingSite.value = null
+          formError.value = ''
+        }
+
+        const formError = ref('')
+
+        const saveSite = () => {
+          if (!editForm.value.title.trim()) {
+            formError.value = '请输入网站名称'
+            return
+          }
+          if (!editForm.value.url.trim()) {
+            formError.value = '请输入网站地址'
+            return
+          }
+          if (!/^https?:\/\//.test(editForm.value.url)) {
+            formError.value = '网站地址必须以 http:// 或 https:// 开头'
+            return
+          }
+
+          if (editingSite.value) {
+            // Update
+            const list = editingType.value === 'learning' ? learningSites : entertainmentSites
+            const index = list.value.findIndex(s => s.id === editingSite.value.id)
+            if (index !== -1) {
+              list.value[index] = { ...list.value[index], ...editForm.value }
+            }
+          } else {
+            // Add
+            const list = editingType.value === 'learning' ? learningSites : entertainmentSites
+            const newId = Math.max(0, ...list.value.map(s => s.id)) + 1
+            list.value.push({ id: newId, ...editForm.value })
+          }
+
+          // Persist
+          saveToStorage()
+          closeModal()
+        }
+
+        // Confirm dialog
+        const showConfirm = ref(false)
+        const confirmTarget = ref(null)
+        const pendingDelete = ref(null)
+
+        const deleteSite = (type, id) => {
+          const list = type === 'learning' ? learningSites : entertainmentSites
+          const site = list.value.find(s => s.id === id)
+          if (site) {
+            confirmTarget.value = site
+            pendingDelete.value = { type, id }
+            showConfirm.value = true
+          }
+        }
+
+        const confirmDelete = () => {
+          if (pendingDelete.value) {
+            const { type, id } = pendingDelete.value
+            const list = type === 'learning' ? learningSites : entertainmentSites
+            list.value = list.value.filter(s => s.id !== id)
+            saveToStorage()
+          }
+          showConfirm.value = false
+          confirmTarget.value = null
+          pendingDelete.value = null
+        }
+
+        const cancelDelete = () => {
+          showConfirm.value = false
+          confirmTarget.value = null
+          pendingDelete.value = null
+        }
+
+        const saveToStorage = () => {
+          localStorage.setItem('homepage_learning', JSON.stringify(learningSites.value))
+          localStorage.setItem('homepage_entertainment', JSON.stringify(entertainmentSites.value))
+        }
+
+        // Load from storage
+        onMounted(() => {
+          // Layout
+          const savedLayout = localStorage.getItem('homepage_layout')
+          if (savedLayout) {
+            layout.value = JSON.parse(savedLayout)
+          }
+
+          // Background
+          const savedBg = localStorage.getItem('homepage_bg')
+          const customBgData = localStorage.getItem('homepage_custom_bg')
+          if (customBgData) {
+            currentBgIndex.value = -1
+            customBg.value = true
+            document.body.style.backgroundImage = `url(${customBgData})`
+          } else if (savedBg !== null) {
+            currentBgIndex.value = parseInt(savedBg)
+            document.body.style.backgroundImage = `url(${backgrounds.value[currentBgIndex.value]})`
+          } else {
+            document.body.style.backgroundImage = `url(${backgrounds.value[0]})`
+          }
+
+          // Sites
+          const savedLearning = localStorage.getItem('homepage_learning')
+          if (savedLearning) {
+            learningSites.value = JSON.parse(savedLearning)
+          }
+
+          const savedEntertainment = localStorage.getItem('homepage_entertainment')
+          if (savedEntertainment) {
+            entertainmentSites.value = JSON.parse(savedEntertainment)
+          }
+        })
+
+        return {
+          // Search
+          searchQuery,
+          aiLinks,
+          doSearch,
+          openUrl,
+          // Drag and Drop
+          dragIndex,
+          dragOverIndex,
+          dragType,
+          dragPlace,
+          isDraggingOver,
+          onDragStart,
+          onDragEnd,
+          onDragEnter,
+          onDragOver,
+          onDragLeave,
+          onDrop,
+          // Layout
+          layout,
+          layoutOptions,
+          gridStyle,
+          setLayout,
+          // Background
+          backgrounds,
+          currentBgIndex,
+          customBg,
+          setBackground,
+          switchBackground,
+          handleBgUpload,
+          // Sites
+          learningSites,
+          entertainmentSites,
+          // Modal
+          showEditModal,
+          showSettings,
+          editingSite,
+          editForm,
+          openAddModal,
+          openEditModal,
+          closeModal,
+          saveSite,
+          formError,
+          deleteSite,
+          showConfirm,
+          confirmTarget,
+          confirmDelete,
+          cancelDelete
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
