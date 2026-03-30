@@ -954,8 +954,14 @@
             cursor: pointer;
             border: 2px solid transparent;
             transition: all 0.2s ease;
-            background-size: cover;
-            background-position: center;
+            overflow: hidden;
+        }
+
+        .bg-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .bg-option:hover {
@@ -1311,8 +1317,9 @@
                     <div class="bg-options">
                         <div v-for="(bg, index) in backgrounds" :key="index" class="bg-option"
                             :class="{ active: currentBgIndex === index && !customBg }"
-                            :style="{ backgroundImage: 'url(' + bg.url + ')' }" :title="bg.title"
-                            @click="setBackground(index)"></div>
+                            :title="bg.title" @click="setBackground(index)">
+                            <img :src="bg.url" :alt="bg.title" loading="lazy">
+                        </div>
                     </div>
                     <div class="bg-upload">
                         <label class="bg-upload-btn">
@@ -1346,12 +1353,32 @@
                     { name: 'MiniMax Agent', icon: '🤖', url: 'https://agent.minimaxi.com' },
                 ]
 
+                // 站点初始数据
+                const DEFAULT_LEARNING_SITES = [
+                    { id: 1, title: 'MiniMax文档', url: 'https://platform.minimaxi.com/docs/token-plan/intro', icon: '🐙' },
+                    { id: 4, title: 'Vue.js', url: 'https://cn.vuejs.org/guide/introduction.html', icon: '💚' },
+                    { id: 5, title: 'React', url: 'https://zh-hans.react.dev/learn', icon: '⚛️' },
+                    { id: 3, title: 'Uniapp', url: 'https://uniapp.dcloud.net.cn/tutorial/', icon: '🦁' },
+                    { id: 2, title: '小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', icon: '📚' },
+                    { id: 2, title: 'Electron', url: 'https://www.electronjs.org/zh/docs/latest/api/app', icon: '💫' },
+                    { id: 6, title: 'LeetCode', url: 'https://leetcode.cn/problemset/javascript/?topicSlugs=array&difficulty=EASY', icon: '🎯' }
+                ]
+                const DEFAULT_ENTERTAINMENT_SITES = [
+                    { id: 11, title: '哔哩哔哩', url: 'https://www.bilibili.com', icon: '🔴' },
+                    { id: 22, title: '百度地图', url: 'https://map.baidu.com', icon: '🗺️' },
+                    { id: 22, title: '百度翻译', url: 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', icon: '🔤' },
+                    { id: 33, title: '微博', url: 'https://weibo.com/mygroups?gid=110007852542185&sudaref=weibo.com', icon: '🐦' },
+                    { id: 55, title: '知乎', url: 'https://www.zhihu.com', icon: '💬' },
+                    { id: 66, title: '腾讯视频', url: 'https://v.qq.com/channel/tv', icon: '🎬' },
+                    { id: 77, title: '芒果TV', url: 'https://www.mgtv.com/lib/1?lastp=list_index&chargeInfo=a1&sort=c1&kind=3075', icon: '🥭' },
+                ]
+
                 const learningSites = ref([
                     { id: 1, title: 'MiniMax文档', url: 'https://platform.minimaxi.com/docs/token-plan/intro', icon: '🐙' },
-                    { id: 4, title: 'Vue.js', url: 'https://vuejs.org', icon: '💚' },
-                    { id: 5, title: 'React', url: 'https://react.dev', icon: '⚛️' },
-                    { id: 2, title: 'MDN', url: 'https://developer.mozilla.org', icon: '📚' },
-                    { id: 3, title: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '💬' },
+                    { id: 4, title: 'Vue.js', url: 'https://cn.vuejs.org/guide/introduction.html', icon: '💚' },
+                    { id: 5, title: 'React', url: 'https://zh-hans.react.dev/learn', icon: '⚛️' },
+                    { id: 3, title: 'Uniapp', url: 'https://uniapp.dcloud.net.cn/tutorial/', icon: '🦁' },
+                    { id: 2, title: '小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', icon: '📚' },
                     { id: 6, title: 'LeetCode', url: 'https://leetcode.cn', icon: '🎯' }
                 ])
 
@@ -1686,7 +1713,7 @@
 
                     // 重置主题
                     isDark.value = false
-                    document.documentElement.setAttribute('data-theme', 'dark')
+                    document.documentElement.setAttribute('data-theme', 'light')
 
                     // 重置布局
                     layout.value = { rows: 3, cols: 4 }
@@ -1695,22 +1722,8 @@
                     customBg.value = false
 
                     // 重置站点数据
-                    learningSites.value = [
-                        { id: 1, title: 'GitHub', url: 'https://github.com', icon: '🐙' },
-                        { id: 2, title: 'MDN', url: 'https://developer.mozilla.org', icon: '📚' },
-                        { id: 3, title: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '💬' },
-                        { id: 4, title: 'Vue.js', url: 'https://vuejs.org', icon: '💚' },
-                        { id: 5, title: 'React', url: 'https://react.dev', icon: '⚛️' },
-                        { id: 6, title: 'LeetCode', url: 'https://leetcode.cn', icon: '🎯' }
-                    ]
-                    entertainmentSites.value = [
-                        { id: 1, title: '哔哩哔哩', url: 'https://www.bilibili.com', icon: '🔴' },
-                        { id: 2, title: '百度地图', url: 'https://map.baidu.com', icon: '🗺️' },
-                        { id: 3, title: '微博', url: 'https://weibo.com', icon: '🐦' },
-                        { id: 4, title: '抖音', url: 'https://www.douyin.com', icon: '🎵' },
-                        { id: 5, title: '知乎', url: 'https://www.zhihu.com', icon: '💬' },
-                        { id: 6, title: '网易云音乐', url: 'https://music.163.com', icon: '🎧' }
-                    ]
+                    learningSites.value = JSON.parse(JSON.stringify(DEFAULT_LEARNING_SITES))
+                    entertainmentSites.value = JSON.parse(JSON.stringify(DEFAULT_ENTERTAINMENT_SITES))
 
                     showSettings.value = false
                 }
