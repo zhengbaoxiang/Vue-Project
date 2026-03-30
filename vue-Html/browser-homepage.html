@@ -18,6 +18,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         /* ========== 浅色主题 ========== */
         :root,
         [data-theme="light"] {
@@ -64,6 +65,7 @@
 
             --color-text-rainbow: linear-gradient(90deg, #ff6b6b, #ffd700, #42b983, #3498db, #9b59b6, #ff6b6b);
         }
+
         /* ========== 深色主题 ========== */
         [data-theme="dark"] {
             --primary: #fb7299;
@@ -346,9 +348,12 @@
         }
 
         @keyframes searchPulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.6), 0 0px 10px rgba(var(--primary-rgb), 0.4);
             }
+
             50% {
                 box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.5), 0 0 32px rgba(var(--primary-rgb), 0.4);
             }
@@ -1148,7 +1153,11 @@
                 <input type="text" class="search-input" v-model="searchQuery" placeholder="百度搜索..."
                     @keyup.enter="doSearch">
                 <button class="search-btn" @click="doSearch">
-                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.3451 15.2003C16.6377 15.4915 16.4752 15.772 16.1934 16.0632C16.15 16.1279 16.0958 16.1818 16.0525 16.2249C15.7707 16.473 15.4456 16.624 15.1854 16.3652L11.6848 12.8815C10.4709 13.8198 8.97529 14.3267 7.44714 14.3267C3.62134 14.3267 0.5 11.2314 0.5 7.41337C0.5 3.60616 3.6105 0.5 7.44714 0.5C11.2729 0.5 14.3943 3.59538 14.3943 7.41337C14.3943 8.98802 13.8524 10.5087 12.8661 11.7383L16.3451 15.2003ZM2.13647 7.4026C2.13647 10.3146 4.52083 12.6766 7.43624 12.6766C10.3517 12.6766 12.736 10.3146 12.736 7.4026C12.736 4.49058 10.3517 2.1286 7.43624 2.1286C4.50999 2.1286 2.13647 4.50136 2.13647 7.4026Z" fill="currentColor"></path></svg>
+                    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M16.3451 15.2003C16.6377 15.4915 16.4752 15.772 16.1934 16.0632C16.15 16.1279 16.0958 16.1818 16.0525 16.2249C15.7707 16.473 15.4456 16.624 15.1854 16.3652L11.6848 12.8815C10.4709 13.8198 8.97529 14.3267 7.44714 14.3267C3.62134 14.3267 0.5 11.2314 0.5 7.41337C0.5 3.60616 3.6105 0.5 7.44714 0.5C11.2729 0.5 14.3943 3.59538 14.3943 7.41337C14.3943 8.98802 13.8524 10.5087 12.8661 11.7383L16.3451 15.2003ZM2.13647 7.4026C2.13647 10.3146 4.52083 12.6766 7.43624 12.6766C10.3517 12.6766 12.736 10.3146 12.736 7.4026C12.736 4.49058 10.3517 2.1286 7.43624 2.1286C4.50999 2.1286 2.13647 4.50136 2.13647 7.4026Z"
+                            fill="currentColor"></path>
+                    </svg>
                 </button>
             </div>
         </section>
@@ -1326,15 +1335,66 @@
 
         createApp({
             setup() {
+                // 初始配置
+                // 可选图标: 🌱  ⚛️ 🔭 ✨ ⚡ 🤖 🧠 💡 🔮 🚀 💬 🎯 🐴 🦊 🐱 🐶 🐼 🦁 🐸 🐵 
+                //           🌟 🌙 ☀️ 🌈 🔥 💫 🎨 🎭 🎪 🎬 📚 📖 🏆 🏅 🎮 🎲 🎸 🎵 🎤
+                const aiLinks = [
+                    { name: '豆包', icon: '🌱', url: 'https://www.doubao.com' },
+                    { name: '千问', icon: '⚛️', url: 'https://tongyi.aliyun.com/qianwen' },
+                    { name: 'DeepSeek', icon: '✨', url: 'https://chat.deepseek.com/' },
+                    { name: '智谱GLM', icon: '⚡', url: 'https://bigmodel.cn/console/overview' },
+                    { name: 'MiniMax Agent', icon: '🤖', url: 'https://agent.minimaxi.com' },
+                ]
+
+                const learningSites = ref([
+                    { id: 1, title: 'MiniMax文档', url: 'https://platform.minimaxi.com/docs/token-plan/intro', icon: '🐙' },
+                    { id: 4, title: 'Vue.js', url: 'https://vuejs.org', icon: '💚' },
+                    { id: 5, title: 'React', url: 'https://react.dev', icon: '⚛️' },
+                    { id: 2, title: 'MDN', url: 'https://developer.mozilla.org', icon: '📚' },
+                    { id: 3, title: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '💬' },
+                    { id: 6, title: 'LeetCode', url: 'https://leetcode.cn', icon: '🎯' }
+                ])
+
+                const entertainmentSites = ref([
+                    { id: 11, title: '哔哩哔哩', url: 'https://www.bilibili.com', icon: '🔴' },
+                    { id: 22, title: '百度地图', url: 'https://map.baidu.com', icon: '🗺️' },
+                    { id: 22, title: '百度翻译', url: 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', icon: '🔤' },
+                    { id: 33, title: '微博', url: 'https://weibo.com/mygroups?gid=110007852542185&sudaref=weibo.com', icon: '🐦' },
+                    { id: 55, title: '知乎', url: 'https://www.zhihu.com', icon: '💬' },
+                    { id: 66, title: '腾讯视频', url: 'https://v.qq.com/channel/tv', icon: '🎬' },
+                    { id: 77, title: '芒果TV', url: 'https://www.mgtv.com/lib/1?lastp=list_index&chargeInfo=a1&sort=c1&kind=3075', icon: '🥭' },
+                ])
+
+                const backgrounds = ref([
+                    { title: '绿色山野', url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920' },
+                    { title: '山川湖泊', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920' },
+                    { title: '雪山峰峦', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920' },
+                    { title: '飞瀑流水', url: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920' },
+                    { title: '林间光线', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920' },
+                    { title: '雪山星空', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920' },
+                    { title: '自然远景', url: 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1920' },
+                    { title: '森林小径', url: 'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=1920' },
+                    { title: '晨曦原野', url: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1920' },
+                    { title: '湖光山色', url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1920' },
+                    { title: '夜间山路', url: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=1920' },
+                    { title: '晚霞余晖', url: 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=1920' },
+                    { title: '热带海滩', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920' },
+                    { title: '银河星空', url: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920' },
+                    { title: '极光之舞', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920' },
+                    { title: '火山烈焰', url: 'https://images.unsplash.com/photo-1462332420958-a05d1e002413?w=1920' },
+                    { title: '樱花时节', url: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=1920' },
+                    { title: '冰洞奇观', url: 'https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?w=1920' },
+                    { title: '竹林幽径', url: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=1920' },
+                    { title: '礁石海浪', url: 'https://images.unsplash.com/photo-1439405326854-014607f694d7?w=1920' },
+                    { title: '夕阳码头', url: 'https://images.unsplash.com/photo-1471922694854-ff1b63b20054?w=1920' },
+                    { title: '瀑布彩虹', url: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=1920' },
+                    { title: '日出云海', url: 'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=1920' },
+                ])
+
                 /* ========================================
                    1. 搜索功能
                    ======================================== */
                 const searchQuery = ref('')
-                const aiLinks = [
-                    { name: '豆包', icon: '🫛', url: 'https://www.doubao.com' },
-                    { name: '千问', icon: '🐴', url: 'https://tongyi.aliyun.com/qianwen' },
-                    { name: 'DeepSeek', icon: '🔮', url: 'https://www.deepseek.com' },
-                ]
 
                 const doSearch = () => {
                     if (!searchQuery.value.trim()) return
@@ -1420,21 +1480,7 @@
                 /* ========================================
                    5. 背景图片管理
                    ======================================== */
-                const backgrounds = ref([
-                    { title: '绿色山野', url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920' },
-                    { title: '山川湖泊', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920' },
-                    { title: '雪山峰峦', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920' },
-                    { title: '飞瀑流水', url: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1920' },
-                    { title: '林间光线', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920' },
-                    { title: '雪山星空', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920' },
-                    { title: '自然远景', url: 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1920' },
-                    { title: '森林小径', url: 'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=1920' },
-                    { title: '晨曦原野', url: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1920' },
-                    { title: '湖光山色', url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1920' },
-                    { title: '夜间山路', url: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=1920' },
-                    { title: '晚霞余晖', url: 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=1920' },
-                    { title: '山水画卷', url: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920' },
-                ])
+
                 const currentBgIndex = ref(0)
                 const customBg = ref(false)
 
@@ -1470,7 +1516,7 @@
 
                 // 自动切换背景定时器
                 const bgTimerId = ref(null)
-                const BG_SWITCH_INTERVAL = 30000 // 30秒切换一次
+                const BG_SWITCH_INTERVAL = 30 * 1000 // **秒切换一次
 
                 const initBackground = () => {
                     const savedBg = localStorage.getItem('homepage_bg')
@@ -1505,35 +1551,9 @@
                     }, BG_SWITCH_INTERVAL)
                 }
 
-                // 清理定时器，防止内存泄漏
-                onUnmounted(() => {
-                    if (bgTimerId.value !== null) {
-                        clearInterval(bgTimerId.value)
-                        bgTimerId.value = null
-                    }
-                })
 
-                /* ========================================
-                   6. 站点数据管理
-                   ======================================== */
-                const learningSites = ref([
-                    { id: 1, title: 'GitHub', url: 'https://github.com', icon: '🐙' },
-                    { id: 4, title: 'Vue.js', url: 'https://vuejs.org', icon: '💚' },
-                    { id: 5, title: 'React', url: 'https://react.dev', icon: '⚛️' },
-                    { id: 2, title: 'MDN', url: 'https://developer.mozilla.org', icon: '📚' },
-                    { id: 3, title: 'Stack Overflow', url: 'https://stackoverflow.com', icon: '💬' },
-                    { id: 6, title: 'LeetCode', url: 'https://leetcode.cn', icon: '🎯' }
-                ])
 
-                const entertainmentSites = ref([
-                    { id: 1, title: '哔哩哔哩', url: 'https://www.bilibili.com', icon: '🔴' },
-                    { id: 22, title: '百度地图', url: 'https://map.baidu.com', icon: '🗺️' },
-                    { id: 22, title: '百度翻译', url: 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', icon: '🔤' },
-                    { id: 33, title: '微博', url: 'https://weibo.com/mygroups?gid=110007852542185&sudaref=weibo.com', icon: '🐦' },
-                    { id: 55, title: '知乎', url: 'https://www.zhihu.com', icon: '💬' },
-                    { id: 66, title: '腾讯视频', url: 'https://v.qq.com/channel/tv', icon: '🎬' },
-                    { id: 77, title: '芒果TV', url: 'https://www.mgtv.com/lib/1?lastp=list_index&chargeInfo=a1&sort=c1&kind=3075', icon: '🥭' },
-                ])
+
 
                 const initSites = () => {
                     const savedLearning = localStorage.getItem('homepage_learning')
@@ -1749,6 +1769,13 @@
                     initLayout()
                     initBackground()
                     initSites()
+                })
+                // 清理定时器，防止内存泄漏
+                onUnmounted(() => {
+                    if (bgTimerId.value !== null) {
+                        clearInterval(bgTimerId.value)
+                        bgTimerId.value = null
+                    }
                 })
 
                 /* ========================================
