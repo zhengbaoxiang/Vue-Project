@@ -405,6 +405,7 @@
         .site-column {
             width: 35%;
             min-width: 280px;
+            box-sizing: border-box;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
@@ -1027,15 +1028,31 @@
         /* ========================================
        Responsive 响应式适配
        ======================================== */
-        @media (max-width: 1200px) {
+        @media (max-width: 1500px) {
             .main-content {
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 height: auto;
                 min-height: auto;
             }
 
             .site-column {
-                width: calc(50% - 15px);
+                width: calc(40%);
+            }
+
+            .center-area {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-wrap: nowrap;
+                height: auto;
+                min-height: auto;
+            }
+
+            .site-column {
+                width: calc(48%);
             }
 
             .center-area {
