@@ -594,12 +594,12 @@
         @keyframes cardEnter {
             from {
                 opacity: 0;
-                transform: translateY(80px) scale(0.9);
+                transform: scale(0.7);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: scale(1);
             }
         }
 
@@ -1168,9 +1168,35 @@
             </div>
         </section>
 
-        <!-- Main Content -->
+        <!-- ========================================
+         Main Content 主内容区域
+         ======================================== -->
         <main class="main-content">
-            <!-- Learning Column -->
+            <!-- Learning Column 学习技术列 -->
+            <!--
+                【拖拽相关的事件绑定说明】
+
+                1. cards-grid 容器上绑定:
+                   - @dragover.prevent: 允许拖拽经过此处（prevent阻止默认拒绝行为）
+                   - @drop: 放置操作的目标区域
+
+                2. 每个 site-card 上绑定:
+                   - draggable="true": 启用该元素的拖拽功能
+                   - @dragstart: 开始拖拽时触发，传递 site对象、index、type
+                   - @dragend: 拖拽结束时触发
+                   - @dragenter: 拖拽进入该卡片时触发，更新 dropIndex
+
+                3. CSS 类名切换实现视觉反馈:
+                   - 'dragging': 当前正在被拖拽的卡片（自己）
+                   - 'drag-over': 放置目标位置的卡片（悬停位置）
+
+                【事件触发顺序】:
+                   开始拖拽 → dragstart
+                   拖拽经过 → dragover (在容器上)
+                   进入卡片 → dragenter
+                   放置 → drop
+                   结束 → dragend
+            -->
             <div class="site-column">
                 <div class="column-header">
                     <div class="column-title m-loop-color-text">
@@ -1181,9 +1207,16 @@
                         +
                     </button>
                 </div>
+                <!-- 拖拽区域容器：必须阻止 dragover 默认行为才能接收 drop -->
                 <div class="cards-grid" :style="gridStyle" @dragover.prevent="onDragOver($event, 'learning')"
                     @drop="onDrop($event, 'learning')">
                     <template v-if="learningSites.length > 0">
+                        <!--
+                            draggable="true": 让此卡片可拖拽
+                            :class 动态类:
+                              - dragging: 当前被拖拽的卡片（自己）→ 半透明+缩小
+                              - drag-over: 放置目标卡片 → 边框高亮+放大
+                        -->
                         <div v-for="(site, index) in learningSites" :key="site.id" class="site-card" :class="{
                 'dragging': dragIndex === index && dragType === 'learning',
                 'drag-over': dropIndex === index && dragType === 'learning'
@@ -1216,7 +1249,7 @@
                 <div class="center-glow"></div>
             </div>
 
-            <!-- Entertainment Column -->
+            <!-- Entertainment Column 日常娱乐列（拖拽逻辑同上） -->
             <div class="site-column">
                 <div class="column-header">
                     <div class="column-title m-loop-color-shift">
@@ -1231,11 +1264,12 @@
                     @drop="onDrop($event, 'entertainment')">
                     <template v-if="entertainmentSites.length > 0">
                         <div v-for="(site, index) in entertainmentSites" :key="site.id" class="site-card" :class="{
-                'dragging': dragIndex === index && dragType === 'entertainment',
-                'drag-over': dropIndex === index && dragType === 'entertainment'
-              }" :style="{ animationDelay: (index * 0.12) + 's' }" draggable="true"
-                            @dragstart="onDragStart($event, site, index, 'entertainment')" @dragend="onDragEnd"
-                            @dragenter="onDragEnter($event, index, 'entertainment')" @click="openUrl(site.url)">
+                                'dragging': dragIndex === index && dragType === 'entertainment',
+                                'drag-over': dropIndex === index && dragType === 'entertainment'
+                            }" :style="{ animationDelay: (index * 0.10) + 's' }" draggable="true"
+                            @dragstart="onDragStart($event, site, index, 'entertainment')"
+                            @dragenter="onDragEnter($event, index, 'entertainment')" @dragend="onDragEnd"
+                            @click="openUrl(site.url)">
                             <div class="card-content">
                                 <span class="card-icon card-icon-fallback">{{ site.icon }}</span>
                                 <img class="card-icon" :src="getFavicon(site.url)" :alt="site.title"
@@ -1316,8 +1350,8 @@
                     <div class="settings-label">背景图片</div>
                     <div class="bg-options">
                         <div v-for="(bg, index) in backgrounds" :key="index" class="bg-option"
-                            :class="{ active: currentBgIndex === index && !customBg }"
-                            :title="bg.title" @click="setBackground(index)">
+                            :class="{ active: currentBgIndex === index && !customBg }" :title="bg.title"
+                            @click="setBackground(index)">
                             <img :src="bg.url" :alt="bg.title" loading="lazy">
                         </div>
                     </div>
@@ -1353,19 +1387,19 @@
                     { name: 'MiniMax Agent', icon: '🤖', url: 'https://agent.minimaxi.com' },
                 ]
 
-                // 站点初始数据
-                const DEFAULT_LEARNING_SITES = [
+                // 站点初始数据（工厂函数，ref 初始化和 reset 共用）
+                const createLearningSites = () => [
                     { id: 1, title: 'MiniMax文档', url: 'https://platform.minimaxi.com/docs/token-plan/intro', icon: '🐙' },
-                    { id: 4, title: 'Vue.js', url: 'https://cn.vuejs.org/guide/introduction.html', icon: '💚' },
-                    { id: 5, title: 'React', url: 'https://zh-hans.react.dev/learn', icon: '⚛️' },
-                    { id: 3, title: 'Uniapp', url: 'https://uniapp.dcloud.net.cn/tutorial/', icon: '🦁' },
-                    { id: 2, title: '小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', icon: '📚' },
-                    { id: 2, title: 'Electron', url: 'https://www.electronjs.org/zh/docs/latest/api/app', icon: '💫' },
-                    { id: 6, title: 'LeetCode', url: 'https://leetcode.cn/problemset/javascript/?topicSlugs=array&difficulty=EASY', icon: '🎯' }
+                    { id: 21, title: 'Vue.js', url: 'https://cn.vuejs.org/guide/introduction.html', icon: '💚' },
+                    { id: 22, title: 'React', url: 'https://zh-hans.react.dev/learn', icon: '⚛️' },
+                    { id: 23, title: 'Uniapp', url: 'https://uniapp.dcloud.net.cn/tutorial/', icon: '🦁' },
+                    { id: 24, title: '小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', icon: '📚' },
+                    { id: 25, title: 'Electron', url: 'https://www.electronjs.org/zh/docs/latest/api/app', icon: '💫' },
+                    { id: 41, title: 'LeetCode', url: 'https://leetcode.cn/problemset/javascript/?topicSlugs=array&difficulty=EASY', icon: '🎯' }
                 ]
-                const DEFAULT_ENTERTAINMENT_SITES = [
+                const createEntertainmentSites = () => [
                     { id: 11, title: '哔哩哔哩', url: 'https://www.bilibili.com', icon: '🔴' },
-                    { id: 22, title: '百度地图', url: 'https://map.baidu.com', icon: '🗺️' },
+                    { id: 21, title: '百度地图', url: 'https://map.baidu.com', icon: '🗺️' },
                     { id: 22, title: '百度翻译', url: 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', icon: '🔤' },
                     { id: 33, title: '微博', url: 'https://weibo.com/mygroups?gid=110007852542185&sudaref=weibo.com', icon: '🐦' },
                     { id: 55, title: '知乎', url: 'https://www.zhihu.com', icon: '💬' },
@@ -1373,24 +1407,8 @@
                     { id: 77, title: '芒果TV', url: 'https://www.mgtv.com/lib/1?lastp=list_index&chargeInfo=a1&sort=c1&kind=3075', icon: '🥭' },
                 ]
 
-                const learningSites = ref([
-                    { id: 1, title: 'MiniMax文档', url: 'https://platform.minimaxi.com/docs/token-plan/intro', icon: '🐙' },
-                    { id: 4, title: 'Vue.js', url: 'https://cn.vuejs.org/guide/introduction.html', icon: '💚' },
-                    { id: 5, title: 'React', url: 'https://zh-hans.react.dev/learn', icon: '⚛️' },
-                    { id: 3, title: 'Uniapp', url: 'https://uniapp.dcloud.net.cn/tutorial/', icon: '🦁' },
-                    { id: 2, title: '小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', icon: '📚' },
-                    { id: 6, title: 'LeetCode', url: 'https://leetcode.cn', icon: '🎯' }
-                ])
-
-                const entertainmentSites = ref([
-                    { id: 11, title: '哔哩哔哩', url: 'https://www.bilibili.com', icon: '🔴' },
-                    { id: 22, title: '百度地图', url: 'https://map.baidu.com', icon: '🗺️' },
-                    { id: 22, title: '百度翻译', url: 'https://fanyi.baidu.com/?aldtype=16047#auto/zh', icon: '🔤' },
-                    { id: 33, title: '微博', url: 'https://weibo.com/mygroups?gid=110007852542185&sudaref=weibo.com', icon: '🐦' },
-                    { id: 55, title: '知乎', url: 'https://www.zhihu.com', icon: '💬' },
-                    { id: 66, title: '腾讯视频', url: 'https://v.qq.com/channel/tv', icon: '🎬' },
-                    { id: 77, title: '芒果TV', url: 'https://www.mgtv.com/lib/1?lastp=list_index&chargeInfo=a1&sort=c1&kind=3075', icon: '🥭' },
-                ])
+                const learningSites = ref(createLearningSites())
+                const entertainmentSites = ref(createEntertainmentSites())
 
                 const backgrounds = ref([
                     { title: '绿色山野', url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920' },
@@ -1585,12 +1603,27 @@
                 const initSites = () => {
                     const savedLearning = localStorage.getItem('homepage_learning')
                     if (savedLearning) {
-                        learningSites.value = JSON.parse(savedLearning)
+                        try {
+                            const parsed = JSON.parse(savedLearning)
+                            // 过滤掉无效数据，确保每个元素都有 id
+                            learningSites.value = Array.isArray(parsed)
+                                ? parsed.filter(s => s && typeof s.id !== 'undefined')
+                                : createLearningSites()
+                        } catch {
+                            learningSites.value = createLearningSites()
+                        }
                     }
 
                     const savedEntertainment = localStorage.getItem('homepage_entertainment')
                     if (savedEntertainment) {
-                        entertainmentSites.value = JSON.parse(savedEntertainment)
+                        try {
+                            const parsed = JSON.parse(savedEntertainment)
+                            entertainmentSites.value = Array.isArray(parsed)
+                                ? parsed.filter(s => s && typeof s.id !== 'undefined')
+                                : createEntertainmentSites()
+                        } catch {
+                            entertainmentSites.value = createEntertainmentSites()
+                        }
                     }
                 }
 
@@ -1722,18 +1755,33 @@
                     customBg.value = false
 
                     // 重置站点数据
-                    learningSites.value = JSON.parse(JSON.stringify(DEFAULT_LEARNING_SITES))
-                    entertainmentSites.value = JSON.parse(JSON.stringify(DEFAULT_ENTERTAINMENT_SITES))
+                    learningSites.value = createLearningSites()
+                    entertainmentSites.value = createEntertainmentSites()
 
                     showSettings.value = false
                 }
                 /* ========================================
                    10. 拖拽排序功能
-                   ======================================== */
-                const dragIndex = ref(-1)
-                const dragType = ref('')
-                const dropIndex = ref(-1)
+                   ========================================
 
+                   【流程】dragstart → dragenter(移动) → drop(保存) → dragend(重置)
+
+                   【核心变量】
+                   - dragIndex: 被拖拽元素在数组中的索引（移动后更新为此位置）
+                   - dragType: 分类（learning/entertainment）
+                   - dropIndex: 放置目标索引（由鼠标位置计算）
+
+                   【onDragEnter 位置判断】
+                   根据鼠标在卡片中的 Y 轴位置：
+                   - 上半部 → dropIndex = index（插到该卡片之前）
+                   - 下半部 → dropIndex = index + 1（插到该卡片之后）
+
+                   ======================================== */
+                const dragIndex = ref(-1)     // 被拖拽项在数组中的索引（每次移动后更新）
+                const dragType = ref('')       // 分类
+                const dropIndex = ref(-1)      // 放置目标索引
+
+                /* onDragStart: 开始拖拽，记录原始信息 */
                 const onDragStart = (event, site, index, type) => {
                     dragIndex.value = index
                     dragType.value = type
@@ -1741,26 +1789,20 @@
                     event.dataTransfer.setData('text/plain', site.id)
                 }
 
-                const onDragEnd = () => {
-                    dragIndex.value = -1
-                    dragType.value = ''
-                    dropIndex.value = -1
-                }
 
+
+                /* onDragOver: 允许拖拽经过（必须 preventDefault 否则 drop 不会触发） */
                 const onDragOver = (event, type) => {
                     if (type !== dragType.value) return
                     event.preventDefault()
                 }
 
+                /* onDragEnter: 拖拽进入目标卡片 → 立即移动位置 */
                 const onDragEnter = (event, index, type) => {
                     if (type !== dragType.value) return
                     event.preventDefault()
                     dropIndex.value = index
-                }
 
-                const onDrop = (event, type) => {
-                    if (type !== dragType.value) return
-                    event.preventDefault()
                     if (dropIndex.value === -1 || dragIndex.value === -1) return
 
                     const list = type === 'learning' ? learningSites : entertainmentSites
@@ -1769,10 +1811,31 @@
 
                     if (from === to) return
 
+                    // 【关键数组操作】
+                    // 1. 从原位置移除被拖拽项（splice返回被移除元素的数组）
                     const [item] = list.value.splice(from, 1)
+                    // 2. 插入到新位置
                     list.value.splice(to, 0, item)
+
+                    // 重置索引
+                    dragIndex.value = index
+                    dropIndex.value = -1
+                }
+
+
+                /* onDrop: 放置 → 保存到本地 */
+                const onDrop = (event, type) => {
+                    if (type !== dragType.value) return
+                    event.preventDefault()
                     saveToStorage()
                     onDragEnd()
+                }
+
+                /* onDragEnd: 拖拽结束，重置所有状态 */
+                const onDragEnd = () => {
+                    dragIndex.value = -1
+                    dragType.value = ''
+                    dropIndex.value = -1
                 }
                 /* ========================================
                    11. 初始化 - 调用各模块初始化函数

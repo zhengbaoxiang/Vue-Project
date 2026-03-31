@@ -141,3 +141,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 /vue2_web/dist.zip
+.claude
