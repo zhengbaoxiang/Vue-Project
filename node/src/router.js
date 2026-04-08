@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-04-22 14:42:14
  * @LastEditors: zbx
- * @LastEditTime: 2023-08-21 09:31:26
+ * @LastEditTime: 2026-04-03 19:01:35
  * @descript: 文件描述
  */
 
@@ -9,7 +9,7 @@ module.exports = function (req, res) {
     const paths = req.pathname.split('/')
     const controller = paths[1] || 'home'
     const action = paths[2] || 'index'
-console.log('->',controller,action)
+    console.log('->',controller,action)
     let modulex
     try {
         modulex = require(`./controllers/${controller}`)
