@@ -4,10 +4,10 @@
  * @LastEditTime: 2022-04-26 16:32:40
  * @descript: 作为静态资源服务器使用，承载静态页面，图片css等
  */
-const http = require('http')
 const path = require('path')
 const fs = require('fs')
 const mime = require('mime')
+const http = require('http')
 const URL = require('url')
 
 const config = require('../config')
@@ -39,19 +39,19 @@ http.createServer((req, res) => {
             }
         })
     }
-    
-    console.log('-url>', req.url)
+
+    console.log('---url--->', req.url)
     console.log('-pathname>', req.pathname)
     //配置url/路由 一定要加斜杠/
     if (url === '/' || url === '/index' || url === '/index.html') {
-        let filepath = path.join($config.rootDir, 'resources','index.html')
+        let filepath = path.join($config.rootDir, '/','index.html')
         res.render(filepath)
     } else if (url === '/login' || url === '/login.html') {
         let filepath = path.join($config.rootDir, 'resources/html', 'login.html')
         res.render(filepath)
     } else {
         // 05 静态资源,图片，文件，css等
-        let filepath = path.join($config.staticDir, url)
+        let filepath = path.join($config.rootDir, url)
         res.render(filepath)
     }
 }).listen(8085, function () {

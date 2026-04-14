@@ -142,3 +142,4 @@ dist
 .pnp.*
 /vue2_web/dist.zip
 .claude
+/node/studyNotes1/fileOpsDemo
