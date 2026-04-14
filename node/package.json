@@ -3,6 +3,11 @@
   "version": "1.0.1",
   "description": "test1",
   "main": "index.js",
+  "scripts": {
+    "dev": "vite --config ./config/vite.config.dev.ts",
+    "build": "vite build --config ./config/vite.config.prod.ts",
+    "mc": "git add . && git commit -m \"#941759 代码优化 \" && git pull  && git push"
+  },
   "dependencies": {
     "body-parser": "^1.20.0",
     "cookie-parser": "^1.4.6",
@@ -14,7 +19,6 @@
     "mysql": "^2.18.1"
   },
   "devDependencies": {},
-  "scripts": {},
   "keywords": [
     "t"
   ],

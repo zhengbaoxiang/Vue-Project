@@ -11,6 +11,9 @@ console.log('__dirname:', __dirname)
 console.log('__filename:', __filename)
 
 // 演示用的根目录
+// resolve: 解析为绝对路径，右向左遍历参数，一旦碰到以 / 开头的绝对路径片段，就停止向左拼接
+// const baseDir = path.resolve(__dirname, 'fileOpsDemo') 
+// join: 智能拼接路径
 const baseDir = path.join(__dirname, 'fileOpsDemo')
 
 // 同步暂停函数（阻塞方式，方便观测）
@@ -76,7 +79,7 @@ console.log('已写入新文件:', demoFile)
 //         await fs.promises.unlink(demoFile)
 //     } catch {}
 //     await fs.promises.writeFile(demoFile, '新内容', 'utf-8')
-// }
+// } 
 
 // ============================================================
 // 3 场景3: 追加写入文件

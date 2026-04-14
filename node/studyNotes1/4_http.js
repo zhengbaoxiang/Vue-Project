@@ -1,16 +1,10 @@
-/*
- * @Date: 2022-04-25 16:27:58
- * @LastEditors: zbx
- * @LastEditTime: 2023-08-15 14:54:09
- * @descript: 文件描述
- */
-const mime = require('mime') //第三方模块
+
 //1 加载模块
 const Http = require('http')
+const mime = require('mime') //第三方模块
 
 //2 创建http服务对象
 let server = Http.createServer()
-
 //3 监听request请求
 // request 对象，包含请求报文中的所有内容；response 对象，用来向用户响应数据
 server.on('request', function (request, response) {
@@ -23,14 +17,15 @@ server.listen(8999, function () {
     console.log(`http://localhost:8999 已启动`)
 })
 
+
 //5 合并2、3、4简写，即可创建一个简易的web服务器
 Http.createServer((req, res) => {
     //request 对象常用属性
+    let url = req.url; //请求地址
+    let method = req.method;//请求方法 post/get等
+    let httpVersion = req.httpVersion;//http协议版本
     let header = req.headers; //请求头
     let arrHeader = req.rawHeaders;//请求头拆分为数组
-    let httpVersion = req.httpVersion;//http协议版本
-    let method = req.method;//请求方法 post/get等
-    let url = req.url; //请求地址
 
     //response 对象常用属性
     res.statusCode = 200; //状态码

@@ -39,6 +39,7 @@ http.createServer((req, res) => {
             }
         })
     }
+    
     console.log('-url>', req.url)
     console.log('-pathname>', req.pathname)
     //配置url/路由 一定要加斜杠/
