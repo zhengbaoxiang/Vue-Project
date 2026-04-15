@@ -33,7 +33,7 @@ exports.show = function(){
     console.log(this.ex1,this.ex2)
 }
 
-//   这行会覆盖前面的module.exports指向,
+//   这行会覆盖前面的module.exports.指向,
 // module.exports = '我会重新定义新的对象空间，前面全部失效'
 
 
